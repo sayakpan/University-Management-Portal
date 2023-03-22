@@ -11,33 +11,29 @@ public class Student {
 
     Student() {
         try {
-            Class.forName("com.mysql.jdbc.Driver");
-            System.out.println("\n\n123456789\n\n");
-
-            con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306", "sayakdb", "sayak007");
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/sayakdb", "root", "sayak007");
             state = con.createStatement();
-            System.out.println("\n\n123456789\n\n");
         } catch (SQLException | ClassNotFoundException e) {
-            System.out.println("Driver Load Failed");
+            System.out.println("Connection failed");
             e.printStackTrace();
         }
     }
 
     void selectAll() throws SQLException {
         result = state.executeQuery("select * from employee");
-        System.out.println("FNAME\tLNAME\tADDRESS\tSSN");
+        System.out.printf("%-15s %-15s %-30s %-10s\n", "FNAME", "LNAME", "ADDRESS", "SSN");
         while (result.next()) {
             String fname = result.getString(1);
             String lname = result.getString(3);
             String address = result.getString(6);
             int ssn = result.getInt(4);
-            System.out.println(fname + "\t" + lname + "\t" + address + "\t" + ssn);
+            System.out.printf("%-15s %-15s %-30s %-10d\n", fname, lname, address, ssn);
         }
     }
 
     public static void main(String[] args) throws SQLException {
         Student student = new Student();
         student.selectAll();
-
     }
 }
