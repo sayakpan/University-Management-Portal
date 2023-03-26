@@ -1,12 +1,15 @@
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -39,6 +42,7 @@ public class Student {
     private JTextField userField;
     private JPasswordField passField;
     private JPanel bgPanel;
+    private JButton loginButton;
 
     void selectAll() throws SQLException {
         result = state.executeQuery("select * from students");
@@ -82,7 +86,7 @@ public class Student {
         }
     }
 
-    void welcomePage() {
+    void loginPage() {
         frame = new JFrame("Student Management System");
         frame.setSize(1080, 720);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -93,16 +97,18 @@ public class Student {
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
 
         h2 = new JLabel("Login");
-        h2.setFont(new Font("Verdana", Font.BOLD, 20));
-        h2.setBounds(670, 230, 300, 30);
+        h2.setFont(new Font("Consolas", Font.BOLD, 20));
+        h2.setBounds(650, 230, 300, 30);
 
-        userLabel = new JLabel("Username:");
+        userLabel = new JLabel("Username :");
+        userLabel.setFont(new Font("Consolas", Font.BOLD, 15));
         userLabel.setBounds(500, 300, 80, 25);
 
         userField = new JTextField();
         userField.setBounds(590, 300, 230, 25);
 
         passLabel = new JLabel("Password:");
+        passLabel.setFont(new Font("Consolas", Font.BOLD, 15));
         passLabel.setBounds(500, 340, 80, 25);
 
         passField = new JPasswordField();
@@ -120,9 +126,39 @@ public class Student {
         bgPanel.setBounds(80, 80, 880, 520);
         bgPanel.setLayout(null);
 
-        errorMsg = new JLabel("Incorrect Username or Password !");
+        errorMsg = new JLabel();
         errorMsg.setForeground(Color.red);
         errorMsg.setBounds(590, 370, 230, 25);
+
+        loginButton = new JButton("Login");
+        loginButton.setBounds(650, 400, 70, 25);
+        loginButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String entered_User = userField.getText();
+                String entered_pass = new String(passField.getPassword());
+                try {
+                    String usertype = validateCredentials(entered_User, entered_pass);
+
+                    if (usertype.equals("student")) {
+                        errorMsg.setText("");
+                        System.out.println("Login Approved as Student");
+                    } else if (usertype.equals("teacher")) {
+                        errorMsg.setText("");
+                        System.out.println("Login Approved as Teacher");
+                    } else if (usertype.equals("admin")) {
+                        errorMsg.setText("");
+                        System.out.println("Login Approved as Admin");
+                    } else {
+                        errorMsg.setText("Incorrect Username or Password !");
+                    }
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+
+            }
+        });
 
         frame.add(bgPanel);
         bgPanel.add(h1);
@@ -131,14 +167,26 @@ public class Student {
         bgPanel.add(userField);
         bgPanel.add(passLabel);
         bgPanel.add(passField);
-        bgPanel.add(errorMsg);
         bgPanel.add(image1);
+        bgPanel.add(errorMsg);
+        bgPanel.add(loginButton);
 
         frame.setVisible(true);
     }
 
+    public String validateCredentials(String username, String password) throws SQLException {
+        result = state
+                .executeQuery("select * from users where user_id ='" + username + "' and password= '" + password + "'");
+        if (result.next()) {
+            if (result.getString(1).equals(username) && result.getString(2).equals(password)) {
+                return result.getString(3);
+            }
+        }
+        return "null";
+    }
+
     public static void main(String[] args) throws SQLException {
         Student student = new Student();
-        student.welcomePage();
+        student.loginPage();
     }
 }
