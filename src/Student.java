@@ -16,9 +16,12 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import com.mysql.cj.protocol.Resultset;
+import com.mysql.cj.xdevapi.Result;
+
 public class Student {
     Connection con;
-    Statement state;
+    Statement stmt;
     ResultSet result;
 
     // Establish Connection to the Production Database
@@ -30,22 +33,22 @@ public class Student {
                     "jdbc:mysql://sayakdb-aws.c8l2rvtowbt0.eu-north-1.rds.amazonaws.com:3306/studentdb",
                     "admin",
                     "sayak007");
-            state = con.createStatement();
+            stmt = con.createStatement();
         } catch (SQLException | ClassNotFoundException e) {
             System.out.println("Connection failed");
             e.printStackTrace();
         }
     }
 
-    private JFrame frame;
-    private JLabel h1, h2, userLabel, passLabel, image1, errorMsg;
-    private JTextField userField;
-    private JPasswordField passField;
-    private JPanel bgPanel;
-    private JButton loginButton;
+    static private JFrame frame;
+    static private JLabel h1, h2, userLabel, passLabel, image1, errorMsg;
+    static private JTextField userField;
+    static private JPasswordField passField;
+    static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
+    static private JButton loginButton;
 
     void selectAll() throws SQLException {
-        result = state.executeQuery("select * from students");
+        result = stmt.executeQuery("select * from students");
         System.out.printf("%-10s %-10s %-10s %-25s %-15s %-15s %-10s %-25s\n", "Student_ID", "First_name", "Last_name",
                 "Email_address", "Phone_number", "Date_of_birth", "Gender", "Address");
         while (result.next()) {
@@ -63,7 +66,7 @@ public class Student {
     }
 
     void search(int key) throws SQLException {
-        result = state.executeQuery("select * from students where students.Student_ID = " + key);
+        result = stmt.executeQuery("select * from students where students.Student_ID = " + key);
         if (result.next() == true) {
             System.out.println("\n\nMatch Found !!");
             System.out.printf("%-10s %-10s %-10s %-25s %-15s %-15s %-10s %-25s\n", "Student_ID", "First_name",
@@ -86,15 +89,24 @@ public class Student {
         }
     }
 
-    void loginPage() {
+    void window() {
         frame = new JFrame("Student Management System");
         frame.setSize(1080, 720);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
+    }
+
+    void loginPage() {
+        window();
 
         h1 = new JLabel("Student Management System");
         h1.setBounds(250, 50, 700, 50);
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
+
+        loginPanel = new JPanel();
+        loginPanel.setBackground(Color.white);
+        loginPanel.setBounds(80, 80, 880, 520);
+        loginPanel.setLayout(null);
 
         h2 = new JLabel("Login");
         h2.setFont(new Font("Consolas", Font.BOLD, 20));
@@ -121,11 +133,6 @@ public class Student {
         image1.setHorizontalAlignment(JLabel.LEFT);
         image1.setBounds(100, 100, 300, 400);
 
-        bgPanel = new JPanel();
-        bgPanel.setBackground(Color.white);
-        bgPanel.setBounds(80, 80, 880, 520);
-        bgPanel.setLayout(null);
-
         errorMsg = new JLabel();
         errorMsg.setForeground(Color.red);
         errorMsg.setBounds(590, 370, 230, 25);
@@ -139,17 +146,22 @@ public class Student {
                 String entered_User = userField.getText();
                 String entered_pass = new String(passField.getPassword());
                 try {
-                    String usertype = validateCredentials(entered_User, entered_pass);
+                    ResultSet user_result = validateCredentials(entered_User, entered_pass);
 
-                    if (usertype.equals("student")) {
+                    if (user_result == null) {
+                        errorMsg.setText("Incorrect Username or Password !");
+                    } else if (user_result.getString(3).equals("student")) {
                         errorMsg.setText("");
                         System.out.println("Login Approved as Student");
-                    } else if (usertype.equals("teacher")) {
+                        studentFrame(user_result);
+                    } else if (user_result.getString(3).equals("teacher")) {
                         errorMsg.setText("");
                         System.out.println("Login Approved as Teacher");
-                    } else if (usertype.equals("admin")) {
+                        teacherFrame(user_result);
+                    } else if (user_result.getString(3).equals("admin")) {
                         errorMsg.setText("");
                         System.out.println("Login Approved as Admin");
+                        adminFrame();
                     } else {
                         errorMsg.setText("Incorrect Username or Password !");
                     }
@@ -160,29 +172,93 @@ public class Student {
             }
         });
 
-        frame.add(bgPanel);
-        bgPanel.add(h1);
-        bgPanel.add(h2);
-        bgPanel.add(userLabel);
-        bgPanel.add(userField);
-        bgPanel.add(passLabel);
-        bgPanel.add(passField);
-        bgPanel.add(image1);
-        bgPanel.add(errorMsg);
-        bgPanel.add(loginButton);
+        frame.add(loginPanel);
+        loginPanel.add(h1);
+        loginPanel.add(h2);
+        loginPanel.add(userLabel);
+        loginPanel.add(userField);
+        loginPanel.add(passLabel);
+        loginPanel.add(passField);
+        loginPanel.add(image1);
+        loginPanel.add(errorMsg);
+        loginPanel.add(loginButton);
 
         frame.setVisible(true);
     }
 
-    public String validateCredentials(String username, String password) throws SQLException {
-        result = state
+    public ResultSet validateCredentials(String username, String password) throws SQLException {
+        result = stmt
                 .executeQuery("select * from users where user_id ='" + username + "' and password= '" + password + "'");
         if (result.next()) {
             if (result.getString(1).equals(username) && result.getString(2).equals(password)) {
-                return result.getString(3);
+                return result;
             }
         }
-        return "null";
+        return null;
+    }
+
+    void studentFrame(ResultSet user) throws SQLException {
+        loginPanel.setVisible(false);
+
+        // Find the Student Data of the Curent User
+        ResultSet currentUser = stmt
+                .executeQuery("Select * from students where students.Email_id='" + user.getString(1) + "'");
+        currentUser.next();
+
+        studentPanel = new JPanel();
+        studentPanel.setBackground(Color.white);
+        studentPanel.setBounds(80, 80, 880, 520);
+        studentPanel.setLayout(null);
+
+        h1 = new JLabel("Welcome " + currentUser.getString(2) + ",");
+        h1.setBounds(50, 50, 400, 50);
+        h1.setFont(new Font("Consolas", Font.PLAIN, 30));
+
+        frame.add(studentPanel);
+        studentPanel.add(h1);
+
+        frame.setVisible(true);
+    }
+
+    void teacherFrame(ResultSet user) throws SQLException {
+        loginPanel.setVisible(false);
+
+        // Find the Teacher Data of the Curent User
+        ResultSet currentUser = stmt
+                .executeQuery("Select * from students where teachers.Email_id='" + user.getString(1) + "'");
+        currentUser.next();
+
+        teacherPanel = new JPanel();
+        teacherPanel.setBackground(Color.white);
+        teacherPanel.setBounds(80, 80, 880, 520);
+        teacherPanel.setLayout(null);
+
+        h1 = new JLabel("Welcome " + currentUser.getString(2) + ",");
+        h1.setBounds(50, 50, 400, 50);
+        h1.setFont(new Font("Consolas", Font.PLAIN, 30));
+
+        frame.add(teacherPanel);
+        teacherPanel.add(h1);
+
+        frame.setVisible(true);
+    }
+
+    void adminFrame() throws SQLException {
+        loginPanel.setVisible(false);
+
+        adminPanel = new JPanel();
+        adminPanel.setBackground(Color.white);
+        adminPanel.setBounds(80, 80, 880, 520);
+        adminPanel.setLayout(null);
+
+        h1 = new JLabel("Administrator");
+        h1.setBounds(50, 50, 400, 50);
+        h1.setFont(new Font("Consolas", Font.PLAIN, 30));
+
+        frame.add(adminPanel);
+        adminPanel.add(h1);
+
+        frame.setVisible(true);
     }
 
     public static void main(String[] args) throws SQLException {
