@@ -16,9 +16,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import com.mysql.cj.protocol.Resultset;
-import com.mysql.cj.xdevapi.Result;
-
 public class Student {
     Connection con;
     Statement stmt;
