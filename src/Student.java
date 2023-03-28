@@ -42,7 +42,8 @@ public class Student {
     static private JTextField userField;
     static private JPasswordField passField;
     static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
-    static private JButton loginButton;
+    static private JButton loginButton, logoutButton;
+    Color themeColor = new Color(52, 88, 235);
 
     void window() {
         frame = new JFrame("Student Management System");
@@ -63,37 +64,40 @@ public class Student {
         loginPanel.setBounds(80, 80, 880, 520);
         loginPanel.setLayout(null);
 
-        h2 = new JLabel("Login");
-        h2.setFont(new Font("Consolas", Font.BOLD, 20));
-        h2.setBounds(650, 230, 300, 30);
+        h2 = new JLabel("Login to Your Account");
+        h2.setFont(new Font("Consolas", Font.BOLD, 25));
+        h2.setForeground(themeColor);
+        h2.setBounds(520, 200, 300, 30);
 
         userLabel = new JLabel("Username :");
         userLabel.setFont(new Font("Consolas", Font.BOLD, 15));
-        userLabel.setBounds(500, 300, 80, 25);
+        userLabel.setBounds(520, 270, 80, 30);
 
-        userField = new JTextField();
-        userField.setBounds(590, 300, 230, 25);
+        userField = new JTextField("admin");
+        userField.setBounds(520, 300, 300, 30);
 
         passLabel = new JLabel("Password:");
         passLabel.setFont(new Font("Consolas", Font.BOLD, 15));
-        passLabel.setBounds(500, 340, 80, 25);
+        passLabel.setBounds(520, 340, 80, 25);
 
-        passField = new JPasswordField();
-        passField.setBounds(590, 340, 230, 25);
+        passField = new JPasswordField("admin");
+        passField.setBounds(520, 370, 300, 30);
 
         ImageIcon imageIcon = new ImageIcon("src//Assets//login.png");
         Image image = imageIcon.getImage().getScaledInstance(300, -1, Image.SCALE_SMOOTH);
         ImageIcon scaledImageIcon = new ImageIcon(image);
         image1 = new JLabel(scaledImageIcon);
         image1.setHorizontalAlignment(JLabel.LEFT);
-        image1.setBounds(100, 100, 300, 400);
+        image1.setBounds(100, 50, 400, 500);
 
         errorMsg = new JLabel();
         errorMsg.setForeground(Color.red);
-        errorMsg.setBounds(590, 370, 230, 25);
+        errorMsg.setBounds(520, 400, 300, 25);
 
         loginButton = new JButton("Login");
-        loginButton.setBounds(650, 400, 70, 25);
+        loginButton.setBounds(620, 430, 90, 25);
+        loginButton.setBackground(themeColor);
+        loginButton.setForeground(Color.WHITE);
         loginButton.addActionListener(new ActionListener() {
 
             @Override
@@ -155,7 +159,7 @@ public class Student {
     void studentFrame(ResultSet user) throws SQLException {
         loginPanel.setVisible(false);
 
-        // Find the Student Data of the Curent User
+        // Find the Data of the Current User
         ResultSet currentUser = stmt
                 .executeQuery("Select * from students where students.Email_id='" + user.getString(1) + "'");
         currentUser.next();
@@ -171,6 +175,7 @@ public class Student {
 
         frame.add(studentPanel);
         studentPanel.add(h1);
+        logoutBtn(studentPanel);
 
         frame.setVisible(true);
     }
@@ -178,7 +183,7 @@ public class Student {
     void teacherFrame(ResultSet user) throws SQLException {
         loginPanel.setVisible(false);
 
-        // Find the Teacher Data of the Curent User
+        // Find the Data of the Curent User
         ResultSet currentUser = stmt
                 .executeQuery("Select * from teachers where teachers.Email_id='" + user.getString(1) + "'");
         currentUser.next();
@@ -194,6 +199,7 @@ public class Student {
 
         frame.add(teacherPanel);
         teacherPanel.add(h1);
+        logoutBtn(teacherPanel);
 
         frame.setVisible(true);
     }
@@ -212,8 +218,25 @@ public class Student {
 
         frame.add(adminPanel);
         adminPanel.add(h1);
+        logoutBtn(adminPanel);
 
         frame.setVisible(true);
+    }
+
+    void logoutBtn(JPanel removePanel) {
+        logoutButton = new JButton("Log Out");
+        logoutButton.setBounds(760, 50, 90, 25);
+        logoutButton.setBackground(themeColor);
+        logoutButton.setForeground(new Color(255, 255, 255));
+        removePanel.add(logoutButton);
+        logoutButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                removePanel.setVisible(false);
+                loginPanel.setVisible(true);
+
+            }
+        });
     }
 
     public static void main(String[] args) throws SQLException {
