@@ -44,48 +44,6 @@ public class Student {
     static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
     static private JButton loginButton;
 
-    void selectAll() throws SQLException {
-        result = stmt.executeQuery("select * from students");
-        System.out.printf("%-10s %-10s %-10s %-25s %-15s %-15s %-10s %-25s\n", "Student_ID", "First_name", "Last_name",
-                "Email_address", "Phone_number", "Date_of_birth", "Gender", "Address");
-        while (result.next()) {
-            String studentId = result.getString(1);
-            String firstName = result.getString(2);
-            String lastName = result.getString(3);
-            String emailAddress = result.getString(4);
-            String phoneNumber = result.getString(5);
-            String dateOfBirth = result.getString(6);
-            String gender = result.getString(7);
-            String address = result.getString(8);
-            System.out.printf("%-10s %-10s %-10s %-25s %-15s %-15s %-10s %-25s\n", studentId, firstName, lastName,
-                    emailAddress, phoneNumber, dateOfBirth, gender, address);
-        }
-    }
-
-    void search(int key) throws SQLException {
-        result = stmt.executeQuery("select * from students where students.Student_ID = " + key);
-        if (result.next() == true) {
-            System.out.println("\n\nMatch Found !!");
-            System.out.printf("%-10s %-10s %-10s %-25s %-15s %-15s %-10s %-25s\n", "Student_ID", "First_name",
-                    "Last_name",
-                    "Email_address", "Phone_number", "Date_of_birth", "Gender", "Address");
-            do {
-                String studentId = result.getString(1);
-                String firstName = result.getString(2);
-                String lastName = result.getString(3);
-                String emailAddress = result.getString(4);
-                String phoneNumber = result.getString(5);
-                String dateOfBirth = result.getString(6);
-                String gender = result.getString(7);
-                String address = result.getString(8);
-                System.out.printf("%-10s %-10s %-10s %-25s %-15s %-15s %-10s %-25s\n", studentId, firstName, lastName,
-                        emailAddress, phoneNumber, dateOfBirth, gender, address);
-            } while (result.next());
-        } else {
-            System.out.println("\nStudent ID " + key + " Not Found  !!");
-        }
-    }
-
     void window() {
         frame = new JFrame("Student Management System");
         frame.setSize(1080, 720);
@@ -222,7 +180,7 @@ public class Student {
 
         // Find the Teacher Data of the Curent User
         ResultSet currentUser = stmt
-                .executeQuery("Select * from students where teachers.Email_id='" + user.getString(1) + "'");
+                .executeQuery("Select * from teachers where teachers.Email_id='" + user.getString(1) + "'");
         currentUser.next();
 
         teacherPanel = new JPanel();
