@@ -123,7 +123,7 @@ public class sampleproject {
     // Login Method
     private void adminLogin(String aname, String apass) throws SQLException {
         String name;
-        String pass;
+        // String pass;
 
         try {
             // creating connection with Database
@@ -131,7 +131,7 @@ public class sampleproject {
             res = state.executeQuery("select * from admin");
             while (res.next()) {
                 name = res.getString(1);
-                pass = res.getString(2);
+                // pass = res.getString(2);
                 // Checking if Given Information is correct or not
                 if (aname.equals("admin") && apass.equals("admin")) {
                     // JOptionPane.showMessageDialog(rootPane, "User Loged in successfully!");
@@ -519,6 +519,11 @@ public class sampleproject {
         index.setSize(1300, 750);
         index.setTitle("Student Result");
         index.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        try {
+            std.conn.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 }
