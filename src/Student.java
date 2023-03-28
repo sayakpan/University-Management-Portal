@@ -50,11 +50,10 @@ public class Student {
         frame.setSize(1080, 720);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
+        loginPage();
     }
 
     void loginPage() {
-        window();
-
         h1 = new JLabel("Student Management System");
         h1.setBounds(250, 50, 700, 50);
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
@@ -73,14 +72,14 @@ public class Student {
         userLabel.setFont(new Font("Consolas", Font.BOLD, 15));
         userLabel.setBounds(520, 270, 80, 30);
 
-        userField = new JTextField("admin");
+        userField = new JTextField("nikita.verma@gmail.com");
         userField.setBounds(520, 300, 300, 30);
 
         passLabel = new JLabel("Password:");
         passLabel.setFont(new Font("Consolas", Font.BOLD, 15));
         passLabel.setBounds(520, 340, 80, 25);
 
-        passField = new JPasswordField("admin");
+        passField = new JPasswordField("08112001");
         passField.setBounds(520, 370, 300, 30);
 
         ImageIcon imageIcon = new ImageIcon("src//Assets//login.png");
@@ -157,11 +156,14 @@ public class Student {
     }
 
     void studentFrame(ResultSet user) throws SQLException {
+        JLabel name, roll_no, father_name, dob, address, email, contact, course, branch;
+
         loginPanel.setVisible(false);
 
         // Find the Data of the Current User
         ResultSet currentUser = stmt
-                .executeQuery("Select * from students where students.Email_id='" + user.getString(1) + "'");
+                .executeQuery("Select * from students,courses where students.Email_id='" + user.getString(1)
+                        + "' and students.Course_ID=courses.Course_ID");
         currentUser.next();
 
         studentPanel = new JPanel();
@@ -170,11 +172,57 @@ public class Student {
         studentPanel.setLayout(null);
 
         h1 = new JLabel("Welcome " + currentUser.getString(2) + ",");
-        h1.setBounds(50, 50, 400, 50);
+        h1.setBounds(50, 40, 400, 50);
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
 
+        name = new JLabel("Name : " + currentUser.getString(2) + " " + currentUser.getString(3));
+        name.setFont(new Font("Consolas", Font.PLAIN, 16));
+        name.setBounds(50, 120, 400, 30);
+
+        roll_no = new JLabel("Roll No : " + currentUser.getString(1));
+        roll_no.setFont(new Font("Consolas", Font.PLAIN, 16));
+        roll_no.setBounds(50, 150, 400, 30);
+
+        father_name = new JLabel("Father's Name : " + currentUser.getString(4));
+        father_name.setFont(new Font("Consolas", Font.PLAIN, 16));
+        father_name.setBounds(50, 180, 400, 30);
+
+        dob = new JLabel("Date of Birth : " + currentUser.getString(6));
+        dob.setFont(new Font("Consolas", Font.PLAIN, 16));
+        dob.setBounds(50, 210, 400, 30);
+
+        address = new JLabel("Address : " + currentUser.getString(7));
+        address.setFont(new Font("Consolas", Font.PLAIN, 16));
+        address.setBounds(50, 240, 600, 30);
+
+        course = new JLabel("Course : " + currentUser.getString(11));
+        course.setFont(new Font("Consolas", Font.PLAIN, 16));
+        course.setBounds(50, 270, 400, 30);
+
+        branch = new JLabel("Branch : " + currentUser.getString(12));
+        branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+        branch.setBounds(50, 300, 400, 30);
+
+        contact = new JLabel("Mobile : " + currentUser.getString(8));
+        contact.setFont(new Font("Consolas", Font.PLAIN, 16));
+        contact.setBounds(550, 120, 300, 30);
+
+        email = new JLabel("Roll No : " + currentUser.getString(5));
+        email.setFont(new Font("Consolas", Font.PLAIN, 16));
+        email.setBounds(550, 150, 400, 30);
+
+        // Add Components
         frame.add(studentPanel);
         studentPanel.add(h1);
+        studentPanel.add(name);
+        studentPanel.add(roll_no);
+        studentPanel.add(father_name);
+        studentPanel.add(dob);
+        studentPanel.add(address);
+        studentPanel.add(course);
+        studentPanel.add(branch);
+        studentPanel.add(contact);
+        studentPanel.add(email);
         logoutBtn(studentPanel);
 
         frame.setVisible(true);
@@ -241,6 +289,6 @@ public class Student {
 
     public static void main(String[] args) throws SQLException {
         Student student = new Student();
-        student.loginPage();
+        student.window();
     }
 }
