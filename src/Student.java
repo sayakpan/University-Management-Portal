@@ -1,13 +1,17 @@
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -22,6 +26,7 @@ public class Student {
     ResultSet result;
 
     // Establish Connection to the Production Database
+
     Student() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
@@ -37,13 +42,88 @@ public class Student {
         }
     }
 
+    // Theme Customisations
+
+    Color themeColor = new Color(0, 162, 237);// (52, 88, 235);
+
+    class MyButtonBlue extends JButton implements MouseListener {
+        MyButtonBlue(String text) {
+            super(text);
+            setBackground(themeColor);
+            setForeground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(themeColor));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            addMouseListener(this);
+        }
+
+        // Implement MouseListener methods
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(new Color(8, 142, 204)); // Set background color when mouse enters
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(themeColor); // Set background color back to default when mouse exits
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+    }
+
+    class MyButtonWhite extends JButton implements MouseListener {
+        MyButtonWhite(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(themeColor);
+            setBorder(BorderFactory.createLineBorder(themeColor));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            addMouseListener(this);
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(Color.LIGHT_GRAY);
+            setForeground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(themeColor);
+            setBorder(BorderFactory.createLineBorder(themeColor));
+        }
+
+        @Override
+        public void mouseClicked(MouseEvent e) {
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+        }
+    }
+
+    // Global Variables
+
     static private JFrame frame;
-    static private JLabel h1, h2, userLabel, passLabel, image1, errorMsg;
-    static private JTextField userField;
-    static private JPasswordField passField;
+    static private JLabel h1, h2;
     static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
-    static private JButton loginButton, logoutButton;
-    Color themeColor = new Color(52, 88, 235);
+
+    // Main Window Starting
 
     void window() {
         frame = new JFrame("Student Management System");
@@ -53,7 +133,14 @@ public class Student {
         loginPage();
     }
 
+    // Login Page Method
+
     void loginPage() {
+        JLabel userLabel, passLabel, image1, errorMsg;
+        JTextField userField;
+        JPasswordField passField;
+        MyButtonBlue loginButton;
+
         h1 = new JLabel("Student Management System");
         h1.setBounds(250, 50, 700, 50);
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
@@ -93,10 +180,8 @@ public class Student {
         errorMsg.setForeground(Color.red);
         errorMsg.setBounds(520, 400, 300, 25);
 
-        loginButton = new JButton("Login");
+        loginButton = new MyButtonBlue("Login");
         loginButton.setBounds(620, 430, 90, 25);
-        loginButton.setBackground(themeColor);
-        loginButton.setForeground(Color.WHITE);
         loginButton.addActionListener(new ActionListener() {
 
             @Override
@@ -144,6 +229,8 @@ public class Student {
         frame.setVisible(true);
     }
 
+    // Method to Validate the Entered Credential
+
     public ResultSet validateCredentials(String username, String password) throws SQLException {
         result = stmt
                 .executeQuery("select * from users where user_id ='" + username + "' and password= '" + password + "'");
@@ -155,8 +242,11 @@ public class Student {
         return null;
     }
 
+    // Executed when the Entered User is a STUDENT
+
     void studentFrame(ResultSet user) throws SQLException {
         JLabel name, roll_no, father_name, dob, address, email, contact, course, branch;
+        MyButtonBlue modifyStudent;
 
         loginPanel.setVisible(false);
 
@@ -211,6 +301,12 @@ public class Student {
         email.setFont(new Font("Consolas", Font.PLAIN, 16));
         email.setBounds(550, 150, 400, 30);
 
+        modifyStudent = new MyButtonBlue("Modify");
+        modifyStudent.setBounds(620, 430, 90, 25);
+        modifyStudent.setBackground(themeColor);
+        modifyStudent.setForeground(Color.WHITE);
+        modifyStudent.addActionListener(null);
+
         // Add Components
         frame.add(studentPanel);
         studentPanel.add(h1);
@@ -227,6 +323,8 @@ public class Student {
 
         frame.setVisible(true);
     }
+
+    // Executed when the Entered User is a TEACHER
 
     void teacherFrame(ResultSet user) throws SQLException {
         loginPanel.setVisible(false);
@@ -252,6 +350,8 @@ public class Student {
         frame.setVisible(true);
     }
 
+    // Executed when the Entered User is a ADMIN
+
     void adminFrame() throws SQLException {
         loginPanel.setVisible(false);
 
@@ -271,18 +371,58 @@ public class Student {
         frame.setVisible(true);
     }
 
+    // LOGOUT Button Method
+
     void logoutBtn(JPanel removePanel) {
-        logoutButton = new JButton("Log Out");
+        MyButtonBlue logoutButton = new MyButtonBlue("Log Out");
         logoutButton.setBounds(760, 50, 90, 25);
-        logoutButton.setBackground(themeColor);
-        logoutButton.setForeground(new Color(255, 255, 255));
         removePanel.add(logoutButton);
         logoutButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                removePanel.setVisible(false);
-                loginPanel.setVisible(true);
+                logoutButton.setEnabled(false);
+                JFrame popup = new JFrame("Confirm Logout");
+                popup.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                popup.setLayout(null);
+                popup.setSize(350, 200);
+                popup.setLocationRelativeTo(studentPanel);
+                popup.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                popup.setVisible(true);
 
+                JPanel popPanel = new JPanel();
+                popPanel.setBackground(Color.WHITE);
+                popPanel.setBounds(0, 0, 350, 200);
+                popPanel.setLayout(null);
+
+                JLabel logoutMSG = new JLabel("Do you want to Log Out?");
+                logoutMSG.setFont(new Font("Consolas", Font.BOLD, 17));
+                logoutMSG.setBounds(50, 25, 250, 30);
+
+                MyButtonBlue yesBtn = new MyButtonBlue("Yes");
+                yesBtn.setBounds(40, 80, 250, 30);
+                yesBtn.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        removePanel.setVisible(false);
+                        loginPanel.setVisible(true);
+                        popup.dispose();
+                    }
+                });
+
+                MyButtonWhite noBtn = new MyButtonWhite("No");
+                noBtn.setBounds(40, 115, 250, 30);
+                noBtn.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        popup.dispose();
+                        logoutButton.setEnabled(true);
+                    }
+                });
+
+                popup.add(popPanel);
+                popPanel.add(logoutMSG);
+                popPanel.add(yesBtn);
+                popPanel.add(noBtn);
             }
         });
     }
