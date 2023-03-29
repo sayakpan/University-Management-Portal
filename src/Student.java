@@ -207,7 +207,7 @@ public class Student {
         contact.setFont(new Font("Consolas", Font.PLAIN, 16));
         contact.setBounds(550, 120, 300, 30);
 
-        email = new JLabel("Roll No : " + currentUser.getString(5));
+        email = new JLabel("Email : " + currentUser.getString(5));
         email.setFont(new Font("Consolas", Font.PLAIN, 16));
         email.setBounds(550, 150, 400, 30);
 
