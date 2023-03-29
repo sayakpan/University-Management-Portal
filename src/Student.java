@@ -187,7 +187,7 @@ public class Student {
         ResultSet currentUser = stmt
                 .executeQuery("Select * from teachers where teachers.Email_id='" + user.getString(1) + "'");
         currentUser.next();
-
+// this is teacher pannel 
         teacherPanel = new JPanel();
         teacherPanel.setBackground(Color.white);
         teacherPanel.setBounds(80, 80, 880, 520);
