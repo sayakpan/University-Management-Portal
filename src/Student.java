@@ -122,6 +122,7 @@ public class Student {
     static private JFrame frame;
     static private JLabel h1, h2;
     static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
+    // static private
 
     // Main Window Starting
 
@@ -246,7 +247,7 @@ public class Student {
 
     void studentFrame(ResultSet user) throws SQLException {
         JLabel name, roll_no, father_name, dob, address, email, contact, course, branch;
-        MyButtonBlue modifyStudent;
+        MyButtonBlue modifyButton;
 
         loginPanel.setVisible(false);
 
@@ -255,6 +256,7 @@ public class Student {
                 .executeQuery("Select * from students,courses where students.Email_id='" + user.getString(1)
                         + "' and students.Course_ID=courses.Course_ID");
         currentUser.next();
+        String user_email = currentUser.getString(5);
 
         studentPanel = new JPanel();
         studentPanel.setBackground(Color.white);
@@ -297,15 +299,22 @@ public class Student {
         contact.setFont(new Font("Consolas", Font.PLAIN, 16));
         contact.setBounds(550, 120, 300, 30);
 
-        email = new JLabel("Email : " + currentUser.getString(5));
+        email = new JLabel("Email : " + user_email);
         email.setFont(new Font("Consolas", Font.PLAIN, 16));
         email.setBounds(550, 150, 400, 30);
 
-        modifyStudent = new MyButtonBlue("Modify");
-        modifyStudent.setBounds(620, 430, 90, 25);
-        modifyStudent.setBackground(themeColor);
-        modifyStudent.setForeground(Color.WHITE);
-        modifyStudent.addActionListener(null);
+        modifyButton = new MyButtonBlue("Modify");
+        modifyButton.setBounds(760, 460, 90, 25);
+        modifyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                father_name.setVisible(false);
+                address.setVisible(false);
+                contact.setVisible(false);
+                modifyButton.setVisible(false);
+                modifyStudent(user_email, father_name, address, contact, modifyButton);
+            }
+        });
 
         // Add Components
         frame.add(studentPanel);
@@ -319,9 +328,86 @@ public class Student {
         studentPanel.add(branch);
         studentPanel.add(contact);
         studentPanel.add(email);
+        studentPanel.add(modifyButton);
         logoutBtn(studentPanel);
 
         frame.setVisible(true);
+    }
+
+    void modifyStudent(String email, JLabel father_name, JLabel address, JLabel contact, JButton modifyBtn) {
+
+        JLabel father_name_New, address_New, contact_New;
+        JTextField father_name_field, address_field, contact_field;
+        MyButtonBlue modifyOK;
+        MyButtonWhite modifyCancel;
+
+        father_name_New = new JLabel("Father's Name : ");
+        father_name_New.setFont(new Font("Consolas", Font.PLAIN, 16));
+        father_name_New.setBounds(50, 180, 150, 30);
+
+        address_New = new JLabel("Address : ");
+        address_New.setFont(new Font("Consolas", Font.PLAIN, 16));
+        address_New.setBounds(50, 240, 100, 30);
+
+        contact_New = new JLabel("Mobile : ");
+        contact_New.setFont(new Font("Consolas", Font.PLAIN, 16));
+        contact_New.setBounds(550, 120, 100, 30);
+
+        father_name_field = new JTextField(father_name.getText().replaceAll("Father's Name : ", ""));
+        father_name_field.setBounds(190, 180, 200, 25);
+        father_name_field.setFont(new Font("Consolas", Font.PLAIN, 14));
+        father_name_field.setForeground(Color.BLACK);
+
+        address_field = new JTextField(address.getText().replaceAll("Address : ", ""));
+        address_field.setBounds(140, 240, 350, 25);
+        address_field.setFont(new Font("Consolas", Font.PLAIN, 14));
+        address_field.setForeground(Color.BLACK);
+
+        contact_field = new JTextField(contact.getText().replaceAll("Mobile : ", ""));
+        contact_field.setBounds(630, 120, 150, 25);
+        contact_field.setFont(new Font("Consolas", Font.PLAIN, 14));
+        contact_field.setForeground(Color.BLACK);
+
+        modifyOK = new MyButtonBlue("OK");
+        modifyOK.setBounds(760, 460, 90, 25);
+
+        modifyCancel = new MyButtonWhite("Cancel");
+        modifyCancel.setBounds(760, 430, 90, 25);
+
+        modifyOK.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    stmt.executeUpdate(
+                            "UPDATE students SET Fathers_name='" + father_name_field.getText() + "',Address='"
+                                    + address_field.getText() + "',Contact_no='" + contact_field.getText()
+                                    + "' where Email_id='" + email + "';");
+
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+                modifyOK.setVisible(false);
+                modifyCancel.setVisible(false);
+                modifyBtn.setVisible(true);
+                return;
+            }
+
+        });
+
+        modifyCancel.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+            };
+        });
+
+        studentPanel.add(father_name_New);
+        studentPanel.add(address_New);
+        studentPanel.add(contact_New);
+        studentPanel.add(father_name_field);
+        studentPanel.add(address_field);
+        studentPanel.add(contact_field);
+        studentPanel.add(modifyOK);
+        studentPanel.add(modifyCancel);
     }
 
     // Executed when the Entered User is a TEACHER
