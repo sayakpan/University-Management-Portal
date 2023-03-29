@@ -182,6 +182,9 @@ public class Student {
 
     void teacherFrame(ResultSet user) throws SQLException {
         loginPanel.setVisible(false);
+        JLabel lb, lb1, lb2, lb3, lb4,lb5,lb6,lb7,lb8;
+
+        JTextField tf1, tf2, tf3, tf4,tf5,tf6,tf7,tf8;
 
         // Find the Data of the Curent User
         ResultSet currentUser = stmt
@@ -199,6 +202,149 @@ public class Student {
 
         frame.add(teacherPanel);
         teacherPanel.add(h1);
+
+        lb1 = new JLabel("Teacher ID");
+        lb1.setBounds(50, 110, 170, 20);
+        lb1.setFont(new Font("Consolas", Font.BOLD, 20));
+
+        tf1 = new JTextField(30);
+        tf1.setBounds(180, 110, 200, 20);
+        tf1.setFont(new Font("Console", Font.BOLD, 18));
+
+        lb2 = new JLabel("Teacher Name");
+        lb2.setBounds(50, 180, 170, 20);
+        lb2.setFont(new Font("Consolas", Font.BOLD, 20));
+
+        tf2 = new JTextField(15);
+        tf2.setBounds(190, 180, 200, 22);
+        tf2.setFont(new Font("Console", Font.BOLD, 18));
+
+
+        lb3 = new JLabel("Designation");
+        lb3.setBounds(50, 250, 170, 20);
+        lb3.setFont(new Font("Consolas", Font.BOLD, 20));
+
+        tf3 = new JTextField(15);
+        tf3.setBounds(180, 250, 200, 22);
+        tf3.setFont(new Font("Console", Font.PLAIN, 18));
+
+
+        lb4 = new JLabel("Contact No");
+        lb4.setBounds(50, 320, 170, 20);
+        lb4.setFont(new Font("Consolas", Font.BOLD, 20));
+
+        tf4 = new JTextField(30);
+        tf4.setBounds(180, 320, 200, 20);
+        tf4.setFont(new Font("Console", Font.PLAIN, 18));
+
+
+        lb5 = new JLabel("Email");
+        lb5.setBounds(430, 110, 170, 20);
+        lb5.setFont(new Font("Consolas", Font.BOLD, 20));
+
+        tf5 = new JTextField(30);
+        tf5.setBounds(500, 110, 200, 26);//
+        tf5.setFont(new Font("Console", Font.PLAIN, 18));
+
+
+        lb6 = new JLabel("Address");
+        lb6.setBounds(435, 180, 170, 22);
+        lb6.setFont(new Font("Consolas", Font.BOLD, 20));
+
+
+        tf6 = new JTextField(45);
+        tf6.setBounds(520, 180, 320, 24);
+        tf6.setFont(new Font("Console", Font.PLAIN, 16));
+
+
+        lb7 = new JLabel("DOB");
+        lb7.setBounds(435, 250, 200, 20);
+        lb7.setFont(new Font("Consolas", Font.BOLD, 20));
+
+        tf7 = new JTextField(30);
+        tf7.setBounds(500, 250, 200, 20);
+        tf7.setFont(new Font("Console", Font.PLAIN, 20));
+
+        lb8 = new JLabel("Course ID");
+        lb8.setBounds(430, 320, 200, 20);
+        lb8.setFont(new Font("Consolas", Font.BOLD, 20));
+
+        tf8 = new JTextField(30);
+        tf8.setBounds(510, 320, 200, 20);
+        tf8.setFont(new Font("Console", Font.PLAIN, 18));
+
+
+        teacherPanel.setLayout(null);
+
+ 
+
+        //Add components to the JFrame
+        teacherPanel.add(lb1);
+
+        teacherPanel.add(tf1);
+
+        teacherPanel.add(lb2);
+
+        teacherPanel. add(tf2);
+
+        teacherPanel. add(lb3);
+
+        teacherPanel.add(tf3);
+
+        teacherPanel.add(lb4);
+
+        teacherPanel.add(tf4);
+        
+        teacherPanel.add(lb5);
+        
+        teacherPanel.add(tf5);
+        
+        teacherPanel.add(lb6);
+        
+        teacherPanel.add(tf6);
+        
+        teacherPanel.add(lb7);
+        teacherPanel.add(lb8);
+
+        teacherPanel.add(tf7);
+
+        teacherPanel.add(tf8);
+       
+        //Set TextField Editable False
+
+        tf1.setEditable(false);
+        tf2.setEditable(false);
+        tf3.setEditable(false);
+        tf4.setEditable(false);
+        tf5.setEditable(false);
+        tf6.setEditable(false);
+        tf7.setEditable(false);
+        tf8.setEditable(false);
+      
+            //Fetch output
+
+            String s = currentUser.getString(1);
+            String s1 = currentUser.getString(2);
+            String s2 = currentUser.getString(3);
+            String s3 = currentUser.getString(4);
+            String s4 = currentUser.getString(5);
+            String s5 = currentUser.getString(6);
+            String s6 = currentUser.getString(7);
+            String s7 = currentUser.getString(8);
+            String s8= currentUser.getString(9);
+
+            //Sets Records in TextFields.
+
+            tf1.setText(s);
+            tf2.setText(s1+" " +s2);
+            tf3.setText(s3);
+            tf4.setText(s5);
+            tf5.setText(s4);
+            tf6.setText(s7);
+            tf7.setText(s6);
+            tf8.setText(s8);
+
+
         logoutBtn(teacherPanel);
 
         frame.setVisible(true);
@@ -238,6 +384,11 @@ public class Student {
             }
         });
     }
+
+
+    
+        
+    
 
     public static void main(String[] args) throws SQLException {
         Student student = new Student();
