@@ -124,7 +124,7 @@ public class Student {
     static private JFrame frame;
     static private JLabel h1, h2;
     static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
-    MyButtonBlue modifyButton;
+    MyButtonBlue modifyButton, modifyButton2;
     // static private
 
     // Main Window Starting
@@ -163,14 +163,14 @@ public class Student {
         userLabel.setFont(new Font("Consolas", Font.BOLD, 15));
         userLabel.setBounds(520, 270, 80, 30);
 
-        userField = new JTextField("nikita.verma@gmail.com");
+        userField = new JTextField("sanjay.mishra@gmail.com");
         userField.setBounds(520, 300, 300, 30);
 
         passLabel = new JLabel("Password:");
         passLabel.setFont(new Font("Consolas", Font.BOLD, 15));
         passLabel.setBounds(520, 340, 80, 25);
 
-        passField = new JPasswordField("08112001");
+        passField = new JPasswordField("26041994");
         passField.setBounds(520, 370, 300, 30);
 
         ImageIcon imageIcon = new ImageIcon("src//Assets//login.png");
@@ -454,12 +454,17 @@ public class Student {
     // Executed when the Entered User is a TEACHER
 
     void teacherFrame(ResultSet user) throws SQLException {
+        JLabel name, designation, id, dob, address, contact, email, course, branch;
+
         loginPanel.setVisible(false);
 
         // Find the Data of the Curent User
         ResultSet currentUser = stmt
-                .executeQuery("Select * from teachers where teachers.Email_id='" + user.getString(1) + "'");
+                .executeQuery("Select * from teachers,courses where teachers.Email_id='" + user.getString(1)
+                        + "' and teachers.Course_ID=courses.Course_ID");
+
         currentUser.next();
+        String user_email = currentUser.getString(5);
 
         teacherPanel = new JPanel();
         teacherPanel.setBackground(Color.white);
@@ -470,11 +475,187 @@ public class Student {
         h1.setBounds(50, 50, 400, 50);
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
 
+        name = new JLabel("Name : " + currentUser.getString(2) + " " + currentUser.getString(3));
+        name.setFont(new Font("Consolas", Font.PLAIN, 16));
+        name.setBounds(50, 120, 400, 30);
+
+        id = new JLabel("Teacher ID : " + currentUser.getString(1));
+        id.setFont(new Font("Consolas", Font.PLAIN, 16));
+        id.setBounds(50, 150, 400, 30);
+
+        designation = new JLabel("Designation : " + currentUser.getString(4));
+        designation.setFont(new Font("Consolas", Font.PLAIN, 16));
+        designation.setBounds(50, 180, 400, 30);
+
+        dob = new JLabel("Date of Birth : " + currentUser.getString(6));
+        dob.setFont(new Font("Consolas", Font.PLAIN, 16));
+        dob.setBounds(50, 210, 400, 30);
+
+        address = new JLabel("Address : " + currentUser.getString(7));
+        address.setFont(new Font("Consolas", Font.PLAIN, 16));
+        address.setBounds(50, 240, 600, 30);
+
+        course = new JLabel("Assigned Course : " + currentUser.getString(11));
+        course.setFont(new Font("Consolas", Font.PLAIN, 16));
+        course.setBounds(50, 270, 400, 30);
+
+        branch = new JLabel("Branch : " + currentUser.getString(12));
+        branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+        branch.setBounds(50, 300, 400, 30);
+
+        contact = new JLabel("Mobile : " + currentUser.getString(8));
+        contact.setFont(new Font("Consolas", Font.PLAIN, 16));
+        contact.setBounds(550, 120, 300, 30);
+
+        email = new JLabel("Email : " + user_email);
+        email.setFont(new Font("Consolas", Font.PLAIN, 16));
+        email.setBounds(550, 150, 400, 30);
+
+        modifyButton2 = new MyButtonBlue("Modify");
+        modifyButton2.setBounds(760, 460, 90, 25);
+        modifyButton2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                modifyButton2.setVisible(false);
+                try {
+                    modifyTeacher(user_email, designation, address, contact);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+
+        // Add Components
         frame.add(teacherPanel);
         teacherPanel.add(h1);
+        teacherPanel.add(name);
+        teacherPanel.add(id);
+        teacherPanel.add(designation);
+        teacherPanel.add(dob);
+        teacherPanel.add(address);
+        teacherPanel.add(course);
+        teacherPanel.add(branch);
+        teacherPanel.add(contact);
+        teacherPanel.add(email);
+        teacherPanel.add(modifyButton2);
         logoutBtn(teacherPanel);
 
         frame.setVisible(true);
+    }
+
+    // Modify Button Code For TeacherFrame
+
+    private void modifyTeacher(String email, JLabel designation, JLabel address, JLabel contact) throws SQLException {
+        final String designationOld = designation.getText();
+        final String addressOld = address.getText();
+        final String contactOld = contact.getText();
+
+        JTextField designationField = new JTextField(designation.getText().replaceAll("Designation : ", ""));
+        designation.setText("Designation : ");
+        designationField.setBounds(190, 180, 200, 25);
+        JTextField addressField = new JTextField(address.getText().replaceAll("Address : ", ""));
+        address.setText("Address : ");
+        addressField.setBounds(150, 240, 350, 25);
+        JTextField contactField = new JTextField(contact.getText().replaceAll("Mobile : ", ""));
+        contact.setText("Mobile : ");
+        contactField.setBounds(630, 120, 150, 25);
+
+        teacherPanel.add(designationField);
+        teacherPanel.add(addressField);
+        teacherPanel.add(contactField);
+
+        MyButtonBlue saveButton = new MyButtonBlue("Save");
+        saveButton.setBounds(760, 460, 90, 25);
+
+        MyButtonWhite cancelButton = new MyButtonWhite("Cancel");
+        cancelButton.setBounds(760, 430, 90, 25);
+
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String updateQuery = "UPDATE teachers SET Designation='" + designationField.getText() +
+                            "',Address='" + addressField.getText() + "',Contact_no='" + contactField.getText()
+                            + "' where Email_id='" + email + "';";
+                    stmt.executeUpdate(updateQuery);
+
+                    // Replace the text fields with new labels showing the modified fields
+
+                    designation.setBounds(50, 180, 400, 30);
+                    designation.setText("Designation : " + designationField.getText());
+                    teacherPanel.remove(designationField);
+                    teacherPanel.add(designation);
+
+                    address.setBounds(50, 240, 600, 30);
+                    address.setText("Address : " + addressField.getText());
+                    teacherPanel.remove(addressField);
+                    teacherPanel.add(address);
+
+                    contact.setBounds(550, 120, 300, 30);
+                    contact.setText("Mobile : " + contactField.getText());
+                    teacherPanel.remove(contactField);
+                    teacherPanel.add(contact);
+
+                    designationField.setVisible(false);
+                    addressField.setVisible(false);
+                    contactField.setVisible(false);
+
+                    teacherPanel.add(modifyButton2);
+                    modifyButton2.setVisible(true);
+
+                    teacherPanel.remove(saveButton);
+                    teacherPanel.remove(cancelButton);
+
+                    // Refresh the panel to update its layout
+                    teacherPanel.revalidate();
+                    teacherPanel.repaint();
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                designation.setBounds(50, 180, 400, 30);
+                designation.setText(designationOld);
+                teacherPanel.remove(designationField);
+                teacherPanel.add(designation);
+
+                address.setBounds(50, 240, 600, 30);
+                address.setText(addressOld);
+                teacherPanel.remove(addressField);
+                teacherPanel.add(address);
+
+                contact.setBounds(550, 120, 300, 30);
+                contact.setText(contactOld);
+                teacherPanel.remove(contactField);
+                teacherPanel.add(contact);
+
+                designationField.setVisible(false);
+                addressField.setVisible(false);
+                contactField.setVisible(false);
+
+                teacherPanel.add(modifyButton2);
+                modifyButton2.setVisible(true);
+
+                teacherPanel.remove(saveButton);
+                teacherPanel.remove(cancelButton);
+
+                // Refresh the panel to update its layout
+                teacherPanel.revalidate();
+                teacherPanel.repaint();
+            }
+        });
+
+        teacherPanel.revalidate();
+        teacherPanel.repaint();
+
+        // Add the "Save" button to the panel
+        teacherPanel.add(saveButton);
+        teacherPanel.add(cancelButton);
     }
 
     // Executed when the Entered User is a ADMIN
@@ -512,7 +693,7 @@ public class Student {
                 popup.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 popup.setLayout(null);
                 popup.setSize(350, 200);
-                popup.setLocationRelativeTo(studentPanel);
+                popup.setLocationRelativeTo(removePanel);
                 popup.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 popup.setVisible(true);
                 popup.addWindowListener(new WindowAdapter() {
