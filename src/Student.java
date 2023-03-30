@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -122,6 +124,8 @@ public class Student {
     static private JFrame frame;
     static private JLabel h1, h2;
     static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
+    MyButtonBlue modifyButton;
+    // static private
 
     // Main Window Starting
 
@@ -246,7 +250,6 @@ public class Student {
 
     void studentFrame(ResultSet user) throws SQLException {
         JLabel name, roll_no, father_name, dob, address, email, contact, course, branch;
-        MyButtonBlue modifyStudent;
 
         loginPanel.setVisible(false);
 
@@ -254,7 +257,9 @@ public class Student {
         ResultSet currentUser = stmt
                 .executeQuery("Select * from students,courses where students.Email_id='" + user.getString(1)
                         + "' and students.Course_ID=courses.Course_ID");
+
         currentUser.next();
+        String user_email = currentUser.getString(5);
 
         studentPanel = new JPanel();
         studentPanel.setBackground(Color.white);
@@ -297,15 +302,23 @@ public class Student {
         contact.setFont(new Font("Consolas", Font.PLAIN, 16));
         contact.setBounds(550, 120, 300, 30);
 
-        email = new JLabel("Email : " + currentUser.getString(5));
+        email = new JLabel("Email : " + user_email);
         email.setFont(new Font("Consolas", Font.PLAIN, 16));
         email.setBounds(550, 150, 400, 30);
 
-        modifyStudent = new MyButtonBlue("Modify");
-        modifyStudent.setBounds(620, 430, 90, 25);
-        modifyStudent.setBackground(themeColor);
-        modifyStudent.setForeground(Color.WHITE);
-        modifyStudent.addActionListener(null);
+        modifyButton = new MyButtonBlue("Modify");
+        modifyButton.setBounds(760, 460, 90, 25);
+        modifyButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                modifyButton.setVisible(false);
+                try {
+                    modifyStudent(user_email, father_name, address, contact);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
 
         // Add Components
         frame.add(studentPanel);
@@ -319,9 +332,123 @@ public class Student {
         studentPanel.add(branch);
         studentPanel.add(contact);
         studentPanel.add(email);
+        studentPanel.add(modifyButton);
         logoutBtn(studentPanel);
 
         frame.setVisible(true);
+    }
+
+    private void modifyStudent(String email, JLabel father_name, JLabel address, JLabel contact) throws SQLException {
+        final String fatherNameOld = father_name.getText();
+        final String addressOld = address.getText();
+        final String contactOld = contact.getText();
+
+        JTextField fatherNameField = new JTextField(father_name.getText().replaceAll("Father's Name : ", ""));
+        father_name.setText("Father's Name : ");
+        fatherNameField.setBounds(190, 180, 200, 25);
+        JTextField addressField = new JTextField(address.getText().replaceAll("Address : ", ""));
+        address.setText("Address : ");
+        addressField.setBounds(150, 240, 350, 25);
+        JTextField contactField = new JTextField(contact.getText().replaceAll("Mobile : ", ""));
+        contact.setText("Mobile : ");
+        contactField.setBounds(630, 120, 150, 25);
+
+        studentPanel.add(fatherNameField);
+        studentPanel.add(addressField);
+        studentPanel.add(contactField);
+
+        MyButtonBlue saveButton = new MyButtonBlue("Save");
+        saveButton.setBounds(760, 460, 90, 25);
+
+        MyButtonWhite cancelButton = new MyButtonWhite("Cancel");
+        cancelButton.setBounds(760, 430, 90, 25);
+
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String updateQuery = "UPDATE students SET Fathers_name='" + fatherNameField.getText() +
+                            "',Address='" + addressField.getText() + "',Contact_no='" + contactField.getText()
+                            + "' where Email_id='" + email + "';";
+                    stmt.executeUpdate(updateQuery);
+
+                    // Replace the text fields with new labels showing the modified fields
+
+                    father_name.setBounds(50, 180, 400, 30);
+                    father_name.setText("Father's Name : " + fatherNameField.getText());
+                    studentPanel.remove(fatherNameField);
+                    studentPanel.add(father_name);
+
+                    address.setBounds(50, 240, 600, 30);
+                    address.setText("Address : " + addressField.getText());
+                    studentPanel.remove(addressField);
+                    studentPanel.add(address);
+
+                    contact.setBounds(550, 120, 300, 30);
+                    contact.setText("Mobile : " + contactField.getText());
+                    studentPanel.remove(contactField);
+                    studentPanel.add(contact);
+
+                    fatherNameField.setVisible(false);
+                    addressField.setVisible(false);
+                    contactField.setVisible(false);
+
+                    studentPanel.add(modifyButton);
+                    modifyButton.setVisible(true);
+
+                    studentPanel.remove(saveButton);
+                    studentPanel.remove(cancelButton);
+
+                    // Refresh the panel to update its layout
+                    studentPanel.revalidate();
+                    studentPanel.repaint();
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                father_name.setBounds(50, 180, 400, 30);
+                father_name.setText(fatherNameOld);
+                studentPanel.remove(fatherNameField);
+                studentPanel.add(father_name);
+
+                address.setBounds(50, 240, 600, 30);
+                address.setText(addressOld);
+                studentPanel.remove(addressField);
+                studentPanel.add(address);
+
+                contact.setBounds(550, 120, 300, 30);
+                contact.setText(contactOld);
+                studentPanel.remove(contactField);
+                studentPanel.add(contact);
+
+                fatherNameField.setVisible(false);
+                addressField.setVisible(false);
+                contactField.setVisible(false);
+
+                studentPanel.add(modifyButton);
+                modifyButton.setVisible(true);
+
+                studentPanel.remove(saveButton);
+                studentPanel.remove(cancelButton);
+
+                // Refresh the panel to update its layout
+                studentPanel.revalidate();
+                studentPanel.repaint();
+            }
+        });
+
+        studentPanel.revalidate();
+        studentPanel.repaint();
+
+        // Add the "Save" button to the panel
+        studentPanel.add(saveButton);
+        studentPanel.add(cancelButton);
     }
 
     // Executed when the Entered User is a TEACHER
@@ -388,6 +515,12 @@ public class Student {
                 popup.setLocationRelativeTo(studentPanel);
                 popup.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 popup.setVisible(true);
+                popup.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        logoutButton.setEnabled(true);
+                    }
+                });
 
                 JPanel popPanel = new JPanel();
                 popPanel.setBackground(Color.WHITE);
