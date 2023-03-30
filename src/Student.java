@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -122,6 +124,7 @@ public class Student {
     static private JFrame frame;
     static private JLabel h1, h2;
     static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
+    MyButtonBlue modifyButton;
     // static private
 
     // Main Window Starting
@@ -247,7 +250,6 @@ public class Student {
 
     void studentFrame(ResultSet user) throws SQLException {
         JLabel name, roll_no, father_name, dob, address, email, contact, course, branch;
-        MyButtonBlue modifyButton;
 
         loginPanel.setVisible(false);
 
@@ -255,6 +257,7 @@ public class Student {
         ResultSet currentUser = stmt
                 .executeQuery("Select * from students,courses where students.Email_id='" + user.getString(1)
                         + "' and students.Course_ID=courses.Course_ID");
+
         currentUser.next();
         String user_email = currentUser.getString(5);
 
@@ -308,11 +311,12 @@ public class Student {
         modifyButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                father_name.setVisible(false);
-                address.setVisible(false);
-                contact.setVisible(false);
                 modifyButton.setVisible(false);
-                modifyStudent(user_email, father_name, address, contact, modifyButton);
+                try {
+                    modifyStudent(user_email, father_name, address, contact);
+                } catch (SQLException e1) {
+                    e1.printStackTrace();
+                }
             }
         });
 
@@ -334,80 +338,117 @@ public class Student {
         frame.setVisible(true);
     }
 
-    void modifyStudent(String email, JLabel father_name, JLabel address, JLabel contact, JButton modifyBtn) {
+    private void modifyStudent(String email, JLabel father_name, JLabel address, JLabel contact) throws SQLException {
+        final String fatherNameOld = father_name.getText();
+        final String addressOld = address.getText();
+        final String contactOld = contact.getText();
 
-        JLabel father_name_New, address_New, contact_New;
-        JTextField father_name_field, address_field, contact_field;
-        MyButtonBlue modifyOK;
-        MyButtonWhite modifyCancel;
+        JTextField fatherNameField = new JTextField(father_name.getText().replaceAll("Father's Name : ", ""));
+        father_name.setText("Father's Name : ");
+        fatherNameField.setBounds(190, 180, 200, 25);
+        JTextField addressField = new JTextField(address.getText().replaceAll("Address : ", ""));
+        address.setText("Address : ");
+        addressField.setBounds(150, 240, 350, 25);
+        JTextField contactField = new JTextField(contact.getText().replaceAll("Mobile : ", ""));
+        contact.setText("Mobile : ");
+        contactField.setBounds(630, 120, 150, 25);
 
-        father_name_New = new JLabel("Father's Name : ");
-        father_name_New.setFont(new Font("Consolas", Font.PLAIN, 16));
-        father_name_New.setBounds(50, 180, 150, 30);
+        studentPanel.add(fatherNameField);
+        studentPanel.add(addressField);
+        studentPanel.add(contactField);
 
-        address_New = new JLabel("Address : ");
-        address_New.setFont(new Font("Consolas", Font.PLAIN, 16));
-        address_New.setBounds(50, 240, 100, 30);
+        MyButtonBlue saveButton = new MyButtonBlue("Save");
+        saveButton.setBounds(760, 460, 90, 25);
 
-        contact_New = new JLabel("Mobile : ");
-        contact_New.setFont(new Font("Consolas", Font.PLAIN, 16));
-        contact_New.setBounds(550, 120, 100, 30);
+        MyButtonWhite cancelButton = new MyButtonWhite("Cancel");
+        cancelButton.setBounds(760, 430, 90, 25);
 
-        father_name_field = new JTextField(father_name.getText().replaceAll("Father's Name : ", ""));
-        father_name_field.setBounds(190, 180, 200, 25);
-        father_name_field.setFont(new Font("Consolas", Font.PLAIN, 14));
-        father_name_field.setForeground(Color.BLACK);
-
-        address_field = new JTextField(address.getText().replaceAll("Address : ", ""));
-        address_field.setBounds(140, 240, 350, 25);
-        address_field.setFont(new Font("Consolas", Font.PLAIN, 14));
-        address_field.setForeground(Color.BLACK);
-
-        contact_field = new JTextField(contact.getText().replaceAll("Mobile : ", ""));
-        contact_field.setBounds(630, 120, 150, 25);
-        contact_field.setFont(new Font("Consolas", Font.PLAIN, 14));
-        contact_field.setForeground(Color.BLACK);
-
-        modifyOK = new MyButtonBlue("OK");
-        modifyOK.setBounds(760, 460, 90, 25);
-
-        modifyCancel = new MyButtonWhite("Cancel");
-        modifyCancel.setBounds(760, 430, 90, 25);
-
-        modifyOK.addActionListener(new ActionListener() {
+        saveButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    stmt.executeUpdate(
-                            "UPDATE students SET Fathers_name='" + father_name_field.getText() + "',Address='"
-                                    + address_field.getText() + "',Contact_no='" + contact_field.getText()
-                                    + "' where Email_id='" + email + "';");
+                    String updateQuery = "UPDATE students SET Fathers_name='" + fatherNameField.getText() +
+                            "',Address='" + addressField.getText() + "',Contact_no='" + contactField.getText()
+                            + "' where Email_id='" + email + "';";
+                    stmt.executeUpdate(updateQuery);
 
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
+                    // Replace the text fields with new labels showing the modified fields
+
+                    father_name.setBounds(50, 180, 400, 30);
+                    father_name.setText("Father's Name : " + fatherNameField.getText());
+                    studentPanel.remove(fatherNameField);
+                    studentPanel.add(father_name);
+
+                    address.setBounds(50, 240, 600, 30);
+                    address.setText("Address : " + addressField.getText());
+                    studentPanel.remove(addressField);
+                    studentPanel.add(address);
+
+                    contact.setBounds(550, 120, 300, 30);
+                    contact.setText("Mobile : " + contactField.getText());
+                    studentPanel.remove(contactField);
+                    studentPanel.add(contact);
+
+                    fatherNameField.setVisible(false);
+                    addressField.setVisible(false);
+                    contactField.setVisible(false);
+
+                    studentPanel.add(modifyButton);
+                    modifyButton.setVisible(true);
+
+                    studentPanel.remove(saveButton);
+                    studentPanel.remove(cancelButton);
+
+                    // Refresh the panel to update its layout
+                    studentPanel.revalidate();
+                    studentPanel.repaint();
+
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
                 }
-                modifyOK.setVisible(false);
-                modifyCancel.setVisible(false);
-                modifyBtn.setVisible(true);
-                return;
             }
-
         });
 
-        modifyCancel.addActionListener(new ActionListener() {
+        cancelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-            };
+                father_name.setBounds(50, 180, 400, 30);
+                father_name.setText(fatherNameOld);
+                studentPanel.remove(fatherNameField);
+                studentPanel.add(father_name);
+
+                address.setBounds(50, 240, 600, 30);
+                address.setText(addressOld);
+                studentPanel.remove(addressField);
+                studentPanel.add(address);
+
+                contact.setBounds(550, 120, 300, 30);
+                contact.setText(contactOld);
+                studentPanel.remove(contactField);
+                studentPanel.add(contact);
+
+                fatherNameField.setVisible(false);
+                addressField.setVisible(false);
+                contactField.setVisible(false);
+
+                studentPanel.add(modifyButton);
+                modifyButton.setVisible(true);
+
+                studentPanel.remove(saveButton);
+                studentPanel.remove(cancelButton);
+
+                // Refresh the panel to update its layout
+                studentPanel.revalidate();
+                studentPanel.repaint();
+            }
         });
 
-        studentPanel.add(father_name_New);
-        studentPanel.add(address_New);
-        studentPanel.add(contact_New);
-        studentPanel.add(father_name_field);
-        studentPanel.add(address_field);
-        studentPanel.add(contact_field);
-        studentPanel.add(modifyOK);
-        studentPanel.add(modifyCancel);
+        studentPanel.revalidate();
+        studentPanel.repaint();
+
+        // Add the "Save" button to the panel
+        studentPanel.add(saveButton);
+        studentPanel.add(cancelButton);
     }
 
     // Executed when the Entered User is a TEACHER
@@ -474,6 +515,12 @@ public class Student {
                 popup.setLocationRelativeTo(studentPanel);
                 popup.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 popup.setVisible(true);
+                popup.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        logoutButton.setEnabled(true);
+                    }
+                });
 
                 JPanel popPanel = new JPanel();
                 popPanel.setBackground(Color.WHITE);
