@@ -696,6 +696,7 @@ public class Student {
                 popup.setLocationRelativeTo(removePanel);
                 popup.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
                 popup.setVisible(true);
+                popup.setResizable(false);
                 popup.addWindowListener(new WindowAdapter() {
                     @Override
                     public void windowClosing(WindowEvent e) {
