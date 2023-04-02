@@ -11,6 +11,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,6 +20,7 @@ import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
@@ -174,41 +176,6 @@ public class Student {
         public void mouseReleased(MouseEvent e) {
         }
     }
-
-    // class JMenuItemTheme extends JMenuItem implements MouseListener {
-    // JMenuItemTheme(String text) {
-    // super(text);
-    // setForeground(themeColor);
-    // setBackground(Color.white);
-    // addMouseListener(this);
-    // }
-
-    // @Override
-    // public void mouseEntered(MouseEvent e) {
-    // setBackground(themeColor);
-    // setForeground(Color.WHITE);
-    // setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-    // }
-
-    // @Override
-    // public void mouseExited(MouseEvent e) {
-    // setBackground(Color.WHITE);
-    // setForeground(themeColor);
-    // }
-
-    // @Override
-    // public void mouseClicked(MouseEvent e) {
-    // setBackground(hoverColor);
-    // }
-
-    // @Override
-    // public void mousePressed(MouseEvent e) {
-    // }
-
-    // @Override
-    // public void mouseReleased(MouseEvent e) {
-    // }
-    // }
 
     // Global Variables
 
@@ -827,9 +794,13 @@ public class Student {
                 roll_no.setFont(new Font("Consolas", Font.PLAIN, 16));
                 roll_no.setBounds(20, 70, 200, 30);
 
-                JLabel name = new JLabel("Name :");
-                name.setFont(new Font("Consolas", Font.PLAIN, 16));
-                name.setBounds(20, 100, 200, 30);
+                JLabel fname = new JLabel("First Name :");
+                fname.setFont(new Font("Consolas", Font.PLAIN, 16));
+                fname.setBounds(20, 100, 200, 30);
+
+                JLabel lname = new JLabel("Last Name :");
+                lname.setFont(new Font("Consolas", Font.PLAIN, 16));
+                lname.setBounds(380, 100, 200, 30);
 
                 JLabel father_name = new JLabel("Father's Name :");
                 father_name.setFont(new Font("Consolas", Font.PLAIN, 16));
@@ -845,49 +816,133 @@ public class Student {
 
                 JLabel contact = new JLabel("Mobile :");
                 contact.setFont(new Font("Consolas", Font.PLAIN, 16));
-                contact.setBounds(380, 100, 200, 30);
+                contact.setBounds(380, 130, 200, 30);
 
                 JLabel email = new JLabel("Email : ");
                 email.setFont(new Font("Consolas", Font.PLAIN, 16));
-                email.setBounds(380, 130, 200, 30);
+                email.setBounds(380, 160, 200, 30);
 
                 JLabel course = new JLabel("Course :");
                 course.setFont(new Font("Consolas", Font.PLAIN, 16));
-                course.setBounds(380, 160, 200, 30);
+                course.setBounds(380, 190, 200, 30);
 
-                JLabel branch = new JLabel("Branch :");
-                branch.setFont(new Font("Consolas", Font.PLAIN, 16));
-                branch.setBounds(380, 190, 200, 30);
+                JTextField fnameField = new JTextField();
+                fnameField.setBounds(160, 100, 200, 25);
 
-                JTextField nameField = new JTextField();
-                nameField.setBounds(160, 100, 200, 25);
+                JTextField lnameField = new JTextField();
+                lnameField.setBounds(480, 100, 200, 25);
 
                 JTextField fatherNameField = new JTextField();
                 fatherNameField.setBounds(160, 130, 200, 25);
 
-                JTextField dobField = new JTextField();
+                JTextField dobField = new JTextField("YYYY-MM-DD");
                 dobField.setBounds(160, 160, 200, 25);
 
                 JTextField addressField = new JTextField();
-                addressField.setBounds(160, 190, 200, 25);
+                addressField.setBounds(160, 190, 200, 55);
 
-                JTextField contactField = new JTextField();
-                contactField.setBounds(460, 100, 200, 25);
+                JTextField contactField = new JTextField("+91 ");
+                contactField.setBounds(480, 130, 200, 25);
 
                 JTextField emailField = new JTextField();
-                emailField.setBounds(460, 130, 200, 25);
+                emailField.setBounds(480, 160, 200, 25);
 
-                JTextField courseField = new JTextField();
-                courseField.setBounds(460, 160, 200, 25);
+                JLabel branch = new JLabel("Branch :");
+                branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branch.setBounds(380, 220, 200, 30);
 
-                JTextField branchField = new JTextField();
-                branchField.setBounds(460, 190, 200, 25);
+                String[] branchList = { "-- Select Branch --", "Mechanical Engineering",
+                        "Electronics and Communication Engineering", "Electrical Engineering",
+                        "Computer Science Engineering", "Civil Engineering" };
+                JComboBox<String> branchComboBox = new JComboBox<String>(branchList);
+                branchComboBox.setBounds(480, 220, 200, 25);
+
+                String[] courseList = { "-- Select Course --", "BCA", "MCA", "BTECH", "BBA", "MBA" };
+                JComboBox<String> courseComboBox = new JComboBox<String>(courseList);
+                courseComboBox.setBounds(480, 190, 200, 25);
+                courseComboBox.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (courseComboBox.getSelectedItem().equals("BTECH")) {
+                            adminSubPanel.add(branch);
+                            adminSubPanel.add(branchComboBox);
+                        } else {
+                            adminSubPanel.remove(branch);
+                            adminSubPanel.remove(branchComboBox);
+                        }
+                        adminPanel.revalidate();
+                        adminPanel.repaint();
+                    }
+                });
 
                 MyButtonGreen submitButton = new MyButtonGreen("Submit");
-                submitButton.setBounds(250, 250, 100, 25);
+                submitButton.setBounds(250, 280, 100, 25);
+                submitButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // Check if all fields are filled and ComboBox are Selected
+                        Component[] components = adminSubPanel.getComponents();
+                        for (Component component : components) {
+                            if (component instanceof JTextField) {
+                                JTextField textField = (JTextField) component;
+                                if (textField.getText().trim().isEmpty()) {
+                                    JOptionPane.showMessageDialog(adminSubPanel, "Please fill in all fields.",
+                                            "Empty Field",
+                                            JOptionPane.WARNING_MESSAGE);
+                                    return;
+                                }
+                            }
+                            if (component instanceof JComboBox) {
+                                JComboBox<?> comboBox = (JComboBox<?>) component;
+                                if (comboBox.getSelectedIndex() == 0) {
+                                    JOptionPane.showMessageDialog(adminSubPanel,
+                                            "Please select an item from the drop-down list.", "Empty Drop-Down",
+                                            JOptionPane.WARNING_MESSAGE);
+                                    return;
+                                }
+                            }
+                        }
+                        // Run Ouery to Fetch Course ID
+                        String query;
+                        if (courseComboBox.getSelectedItem().equals("BTECH")) {
+                            query = "select Course_ID from courses where Course_Name='BTECH'and Branch='"
+                                    + branchComboBox.getSelectedItem() + "';";
+                        } else {
+                            query = "select Course_ID from courses where Course_Name='"
+                                    + courseComboBox.getSelectedItem() + "';";
+                        }
+                        System.out.println(query);
+                        try {
+                            result = stmt.executeQuery(query);
+                            result.next();
+                            // Prepared Statement is used to prevent SQL injection attacks
+                            String InsertQuery = "INSERT INTO students (First_name, Last_name, Fathers_name, Email_id, Date_of_birth, Address, Contact_no, Course_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                            PreparedStatement preparedStmt = con.prepareStatement(InsertQuery);
+                            preparedStmt.setString(1, fnameField.getText());
+                            preparedStmt.setString(2, lnameField.getText());
+                            preparedStmt.setString(3, fatherNameField.getText());
+                            preparedStmt.setString(4, emailField.getText());
+                            preparedStmt.setString(5, dobField.getText());
+                            preparedStmt.setString(6, addressField.getText());
+                            preparedStmt.setString(7, contactField.getText());
+                            preparedStmt.setInt(8, result.getInt(1));
+                            // preparedStmt.executeUpdate();
+                            System.out.println(preparedStmt);
+                            ImageIcon doneIcon = new ImageIcon("src//Assets//done.png");
+                            Image doneImage = doneIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
+                            JOptionPane.showMessageDialog(adminSubPanel,
+                                    "Insertion Done !\nUser Name : " + emailField.getText()
+                                            + "\nPassword : DOB in DDMMYYYY format.",
+                                    "Insertion Done",
+                                    JOptionPane.INFORMATION_MESSAGE, new ImageIcon(doneImage));
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                });
 
                 MyButtonWhite clearButton = new MyButtonWhite("Clear");
-                clearButton.setBounds(360, 250, 100, 25);
+                clearButton.setBounds(360, 280, 100, 25);
                 clearButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -896,6 +951,10 @@ public class Student {
                             if (comp instanceof JTextField) {
                                 JTextField textField = (JTextField) comp;
                                 textField.setText("");
+                            }
+                            if (comp instanceof JComboBox) {
+                                JComboBox<?> comboBox = (JComboBox<?>) comp;
+                                comboBox.setSelectedIndex(0);
                             }
                         }
                         JOptionPane.showMessageDialog(adminSubPanel, "Cleared all Inputs !", "Cleared",
@@ -906,22 +965,22 @@ public class Student {
                 adminSubPanel.add(submitButton);
                 adminSubPanel.add(clearButton);
 
-                adminSubPanel.add(name);
+                adminSubPanel.add(fname);
+                adminSubPanel.add(lname);
                 adminSubPanel.add(roll_no);
                 adminSubPanel.add(father_name);
                 adminSubPanel.add(dob);
                 adminSubPanel.add(address);
                 adminSubPanel.add(course);
-                adminSubPanel.add(branch);
                 adminSubPanel.add(contact);
                 adminSubPanel.add(email);
 
-                adminSubPanel.add(nameField);
+                adminSubPanel.add(fnameField);
+                adminSubPanel.add(lnameField);
                 adminSubPanel.add(fatherNameField);
                 adminSubPanel.add(dobField);
                 adminSubPanel.add(addressField);
-                adminSubPanel.add(courseField);
-                adminSubPanel.add(branchField);
+                adminSubPanel.add(courseComboBox);
                 adminSubPanel.add(contactField);
                 adminSubPanel.add(emailField);
 
