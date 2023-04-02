@@ -1,4 +1,5 @@
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Image;
@@ -14,12 +15,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
+import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 public class Student {
@@ -46,7 +53,9 @@ public class Student {
 
     // Theme Customisations
 
-    Color themeColor = new Color(0, 162, 237);// (52, 88, 235);
+    Color themeColor = new Color(10, 133, 204);
+    Color hoverColor = new Color(3, 116, 168);
+    Color greenColor = new Color(24, 168, 40);
 
     class MyButtonBlue extends JButton implements MouseListener {
         MyButtonBlue(String text) {
@@ -61,7 +70,7 @@ public class Student {
         // Implement MouseListener methods
         @Override
         public void mouseEntered(MouseEvent e) {
-            setBackground(new Color(8, 142, 204)); // Set background color when mouse enters
+            setBackground(hoverColor); // Set background color when mouse enters
         }
 
         @Override
@@ -82,32 +91,79 @@ public class Student {
         }
     }
 
-    class MyButtonWhite extends JButton implements MouseListener {
+    class MyButtonWhite extends MyButtonBlue {
         MyButtonWhite(String text) {
             super(text);
             setBackground(Color.WHITE);
-            setForeground(themeColor);
-            setBorder(BorderFactory.createLineBorder(themeColor));
+            setForeground(Color.GRAY);
+            setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
             setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             addMouseListener(this);
         }
 
         @Override
         public void mouseEntered(MouseEvent e) {
-            setBackground(Color.LIGHT_GRAY);
+            setBackground(Color.GRAY);
             setForeground(Color.WHITE);
-            setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
         }
 
         @Override
         public void mouseExited(MouseEvent e) {
             setBackground(Color.WHITE);
-            setForeground(themeColor);
-            setBorder(BorderFactory.createLineBorder(themeColor));
+            setForeground(Color.GRAY);
+        }
+    }
+
+    class MyButtonGreen extends MyButtonBlue {
+
+        MyButtonGreen(String text) {
+            super(text);
+            setBackground(greenColor);
+            setForeground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(greenColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(new Color(8, 120, 21));
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(greenColor);
+        }
+
+    }
+
+    class JMenuItemTheme extends JMenuItem implements MouseListener {
+        JMenuItemTheme(String text) {
+            super(text);
+            setOpaque(true);
+            setBorder(BorderFactory.createEmptyBorder(5, 16, 5, 10));
+            setBackground(themeColor);
+            setForeground(Color.WHITE);
+            setHorizontalAlignment(CENTER);
+            setFont(new Font("Calibri", Font.BOLD, 16));
+            addMouseListener(this);
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(hoverColor);
+            setFont(new Font("Calibri", Font.BOLD, 18));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(themeColor);
+            setFont(new Font("Calibri", Font.BOLD, 16));
         }
 
         @Override
         public void mouseClicked(MouseEvent e) {
+            setBackground(hoverColor);
         }
 
         @Override
@@ -119,13 +175,47 @@ public class Student {
         }
     }
 
+    // class JMenuItemTheme extends JMenuItem implements MouseListener {
+    // JMenuItemTheme(String text) {
+    // super(text);
+    // setForeground(themeColor);
+    // setBackground(Color.white);
+    // addMouseListener(this);
+    // }
+
+    // @Override
+    // public void mouseEntered(MouseEvent e) {
+    // setBackground(themeColor);
+    // setForeground(Color.WHITE);
+    // setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    // }
+
+    // @Override
+    // public void mouseExited(MouseEvent e) {
+    // setBackground(Color.WHITE);
+    // setForeground(themeColor);
+    // }
+
+    // @Override
+    // public void mouseClicked(MouseEvent e) {
+    // setBackground(hoverColor);
+    // }
+
+    // @Override
+    // public void mousePressed(MouseEvent e) {
+    // }
+
+    // @Override
+    // public void mouseReleased(MouseEvent e) {
+    // }
+    // }
+
     // Global Variables
 
     static private JFrame frame;
     static private JLabel h1, h2;
-    static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel;
+    static private JPanel loginPanel, studentPanel, teacherPanel, adminPanel, adminSubPanel;
     MyButtonBlue modifyButton, modifyButton2;
-    // static private
 
     // Main Window Starting
 
@@ -163,14 +253,14 @@ public class Student {
         userLabel.setFont(new Font("Consolas", Font.BOLD, 15));
         userLabel.setBounds(520, 270, 80, 30);
 
-        userField = new JTextField("sanjay.mishra@gmail.com");
+        userField = new JTextField("admin");
         userField.setBounds(520, 300, 300, 30);
 
         passLabel = new JLabel("Password:");
         passLabel.setFont(new Font("Consolas", Font.BOLD, 15));
         passLabel.setBounds(520, 340, 80, 25);
 
-        passField = new JPasswordField("26041994");
+        passField = new JPasswordField("admin");
         passField.setBounds(520, 370, 300, 30);
 
         ImageIcon imageIcon = new ImageIcon("src//Assets//login.png");
@@ -249,8 +339,6 @@ public class Student {
     // Executed when the Entered User is a STUDENT
 
     void studentFrame(ResultSet user) throws SQLException {
-        JLabel name, roll_no, father_name, dob, address, email, contact, course, branch;
-
         loginPanel.setVisible(false);
 
         // Find the Data of the Current User
@@ -266,43 +354,43 @@ public class Student {
         studentPanel.setBounds(80, 80, 880, 520);
         studentPanel.setLayout(null);
 
-        h1 = new JLabel("Welcome " + currentUser.getString(2) + ",");
+        JLabel h1 = new JLabel("Welcome " + currentUser.getString(2) + ",");
         h1.setBounds(50, 40, 400, 50);
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
 
-        name = new JLabel("Name : " + currentUser.getString(2) + " " + currentUser.getString(3));
+        JLabel name = new JLabel("Name : " + currentUser.getString(2) + " " + currentUser.getString(3));
         name.setFont(new Font("Consolas", Font.PLAIN, 16));
         name.setBounds(50, 120, 400, 30);
 
-        roll_no = new JLabel("Roll No : " + currentUser.getString(1));
+        JLabel roll_no = new JLabel("Roll No : " + currentUser.getString(1));
         roll_no.setFont(new Font("Consolas", Font.PLAIN, 16));
         roll_no.setBounds(50, 150, 400, 30);
 
-        father_name = new JLabel("Father's Name : " + currentUser.getString(4));
+        JLabel father_name = new JLabel("Father's Name : " + currentUser.getString(4));
         father_name.setFont(new Font("Consolas", Font.PLAIN, 16));
         father_name.setBounds(50, 180, 400, 30);
 
-        dob = new JLabel("Date of Birth : " + currentUser.getString(6));
+        JLabel dob = new JLabel("Date of Birth : " + currentUser.getString(6));
         dob.setFont(new Font("Consolas", Font.PLAIN, 16));
         dob.setBounds(50, 210, 400, 30);
 
-        address = new JLabel("Address : " + currentUser.getString(7));
+        JLabel address = new JLabel("Address : " + currentUser.getString(7));
         address.setFont(new Font("Consolas", Font.PLAIN, 16));
         address.setBounds(50, 240, 600, 30);
 
-        course = new JLabel("Course : " + currentUser.getString(11));
+        JLabel course = new JLabel("Course : " + currentUser.getString(11));
         course.setFont(new Font("Consolas", Font.PLAIN, 16));
         course.setBounds(50, 270, 400, 30);
 
-        branch = new JLabel("Branch : " + currentUser.getString(12));
+        JLabel branch = new JLabel("Branch : " + currentUser.getString(12));
         branch.setFont(new Font("Consolas", Font.PLAIN, 16));
         branch.setBounds(50, 300, 400, 30);
 
-        contact = new JLabel("Mobile : " + currentUser.getString(8));
+        JLabel contact = new JLabel("Mobile : " + currentUser.getString(8));
         contact.setFont(new Font("Consolas", Font.PLAIN, 16));
         contact.setBounds(550, 120, 300, 30);
 
-        email = new JLabel("Email : " + user_email);
+        JLabel email = new JLabel("Email : " + user_email);
         email.setFont(new Font("Consolas", Font.PLAIN, 16));
         email.setBounds(550, 150, 400, 30);
 
@@ -669,14 +757,192 @@ public class Student {
         adminPanel.setLayout(null);
 
         h1 = new JLabel("Administrator");
-        h1.setBounds(50, 50, 400, 50);
+        h1.setBounds(20, 40, 400, 50);
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
 
+        JMenuBar menuBar = new JMenuBar();
+        menuBar.setBounds(20, 110, 130, 390);
+        menuBar.setBackground(themeColor);
+        menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.PAGE_AXIS));
+
+        // Menu Options
+
+        JMenuItemTheme dashboardMenu = new JMenuItemTheme("Dashboard");
+        JMenuItemTheme addMenu = new JMenuItemTheme("Add Profile");
+        JMenuItemTheme searchMenu = new JMenuItemTheme("Search");
+        JMenuItemTheme updateMenu = new JMenuItemTheme("Update");
+        JMenuItemTheme removeMenu = new JMenuItemTheme("Remove");
+        JMenuItemTheme feeMenu = new JMenuItemTheme("Fee Details");
+        JMenuItemTheme examMenu = new JMenuItemTheme("Examination");
+
+        menuBar.add(dashboardMenu);
+        menuBar.add(addMenu);
+        menuBar.add(searchMenu);
+        menuBar.add(updateMenu);
+        menuBar.add(removeMenu);
+        menuBar.add(feeMenu);
+        menuBar.add(examMenu);
+
+        // Action Listeners
+
+        addMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                AddNewProfile();
+            }
+        });
+
+        adminPanel.add(menuBar);
         frame.add(adminPanel);
         adminPanel.add(h1);
         logoutBtn(adminPanel);
 
         frame.setVisible(true);
+    }
+
+    void AddNewProfile() {
+        adminSubPanel = new JPanel();
+        adminSubPanel.setBackground(new Color(232, 246, 255));
+        adminSubPanel.setBounds(160, 110, 700, 390);
+        adminSubPanel.setLayout(null);
+
+        JRadioButton addStudent = new JRadioButton("Add Student Profile");
+        addStudent.setBounds(20, 15, 150, 30);
+        addStudent.setBackground(adminSubPanel.getBackground());
+
+        JRadioButton addTeacher = new JRadioButton("Add Teacher Profile");
+        addTeacher.setBounds(175, 15, 150, 30);
+        addTeacher.setBackground(adminSubPanel.getBackground());
+
+        ButtonGroup RadioButtonGroup = new ButtonGroup();
+        RadioButtonGroup.add(addStudent);
+        RadioButtonGroup.add(addTeacher);
+
+        addStudent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Student Add Triggered");
+
+                JLabel roll_no = new JLabel("Roll No : Automatic");
+                roll_no.setFont(new Font("Consolas", Font.PLAIN, 16));
+                roll_no.setBounds(20, 70, 200, 30);
+
+                JLabel name = new JLabel("Name :");
+                name.setFont(new Font("Consolas", Font.PLAIN, 16));
+                name.setBounds(20, 100, 200, 30);
+
+                JLabel father_name = new JLabel("Father's Name :");
+                father_name.setFont(new Font("Consolas", Font.PLAIN, 16));
+                father_name.setBounds(20, 130, 200, 30);
+
+                JLabel dob = new JLabel("Date of Birth :");
+                dob.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dob.setBounds(20, 160, 200, 30);
+
+                JLabel address = new JLabel("Address :");
+                address.setFont(new Font("Consolas", Font.PLAIN, 16));
+                address.setBounds(20, 190, 100, 30);
+
+                JLabel contact = new JLabel("Mobile :");
+                contact.setFont(new Font("Consolas", Font.PLAIN, 16));
+                contact.setBounds(380, 100, 200, 30);
+
+                JLabel email = new JLabel("Email : ");
+                email.setFont(new Font("Consolas", Font.PLAIN, 16));
+                email.setBounds(380, 130, 200, 30);
+
+                JLabel course = new JLabel("Course :");
+                course.setFont(new Font("Consolas", Font.PLAIN, 16));
+                course.setBounds(380, 160, 200, 30);
+
+                JLabel branch = new JLabel("Branch :");
+                branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branch.setBounds(380, 190, 200, 30);
+
+                JTextField nameField = new JTextField();
+                nameField.setBounds(160, 100, 200, 25);
+
+                JTextField fatherNameField = new JTextField();
+                fatherNameField.setBounds(160, 130, 200, 25);
+
+                JTextField dobField = new JTextField();
+                dobField.setBounds(160, 160, 200, 25);
+
+                JTextField addressField = new JTextField();
+                addressField.setBounds(160, 190, 200, 25);
+
+                JTextField contactField = new JTextField();
+                contactField.setBounds(460, 100, 200, 25);
+
+                JTextField emailField = new JTextField();
+                emailField.setBounds(460, 130, 200, 25);
+
+                JTextField courseField = new JTextField();
+                courseField.setBounds(460, 160, 200, 25);
+
+                JTextField branchField = new JTextField();
+                branchField.setBounds(460, 190, 200, 25);
+
+                MyButtonGreen submitButton = new MyButtonGreen("Submit");
+                submitButton.setBounds(250, 250, 100, 25);
+
+                MyButtonWhite clearButton = new MyButtonWhite("Clear");
+                clearButton.setBounds(360, 250, 100, 25);
+                clearButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Component[] components = adminSubPanel.getComponents();
+                        for (Component comp : components) {
+                            if (comp instanceof JTextField) {
+                                JTextField textField = (JTextField) comp;
+                                textField.setText("");
+                            }
+                        }
+                        JOptionPane.showMessageDialog(adminSubPanel, "Cleared all Inputs !", "Cleared",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    }
+                });
+
+                adminSubPanel.add(submitButton);
+                adminSubPanel.add(clearButton);
+
+                adminSubPanel.add(name);
+                adminSubPanel.add(roll_no);
+                adminSubPanel.add(father_name);
+                adminSubPanel.add(dob);
+                adminSubPanel.add(address);
+                adminSubPanel.add(course);
+                adminSubPanel.add(branch);
+                adminSubPanel.add(contact);
+                adminSubPanel.add(email);
+
+                adminSubPanel.add(nameField);
+                adminSubPanel.add(fatherNameField);
+                adminSubPanel.add(dobField);
+                adminSubPanel.add(addressField);
+                adminSubPanel.add(courseField);
+                adminSubPanel.add(branchField);
+                adminSubPanel.add(contactField);
+                adminSubPanel.add(emailField);
+
+                adminPanel.revalidate();
+                adminPanel.repaint();
+            }
+        });
+
+        addTeacher.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Teacher");
+            }
+        });
+
+        adminSubPanel.add(addStudent);
+        adminSubPanel.add(addTeacher);
+
+        adminPanel.add(adminSubPanel);
+        adminPanel.revalidate();
+        adminPanel.repaint();
     }
 
     // LOGOUT Button Method
