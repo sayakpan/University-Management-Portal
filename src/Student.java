@@ -1,3 +1,4 @@
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
@@ -5,6 +6,8 @@ import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
@@ -29,6 +32,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 public class Student {
@@ -750,12 +754,26 @@ public class Student {
         menuBar.add(feeMenu);
         menuBar.add(examMenu);
 
+        adminSubPanel = new JPanel();
+        adminSubPanel.setBackground(new Color(232, 246, 255));
+        adminSubPanel.setBounds(160, 110, 700, 390);
+        adminSubPanel.setLayout(null);
+
         // Action Listeners
 
         addMenu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
                 AddNewProfile();
+            }
+        });
+
+        updateMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
+                UpdateExistingProfile();
             }
         });
 
@@ -767,12 +785,9 @@ public class Student {
         frame.setVisible(true);
     }
 
-    void AddNewProfile() {
-        adminSubPanel = new JPanel();
-        adminSubPanel.setBackground(new Color(232, 246, 255));
-        adminSubPanel.setBounds(160, 110, 700, 390);
-        adminSubPanel.setLayout(null);
+    // Method to Add Profiles from Admin
 
+    void AddNewProfile() {
         JRadioButton addStudent = new JRadioButton("Add Student Profile");
         addStudent.setBounds(20, 15, 150, 30);
         addStudent.setBackground(adminSubPanel.getBackground());
@@ -936,6 +951,9 @@ public class Student {
                                     "Insertion Done",
                                     JOptionPane.INFORMATION_MESSAGE, new ImageIcon(doneImage));
                         } catch (SQLException e1) {
+                            JOptionPane.showMessageDialog(adminSubPanel,
+                                    "ERROR : Profile Creation Failed\nCheck console for details", "Error",
+                                    JOptionPane.ERROR_MESSAGE);
                             e1.printStackTrace();
                         }
                     }
@@ -1004,6 +1022,244 @@ public class Student {
         adminPanel.repaint();
     }
 
+    // Method to Update any Existing Profile from Admin
+
+    void UpdateExistingProfile() {
+        JRadioButton updateStudent = new JRadioButton("Update Student Details");
+        updateStudent.setBounds(20, 15, 170, 30);
+        updateStudent.setBackground(adminSubPanel.getBackground());
+
+        JRadioButton updateTeacher = new JRadioButton("Update Teacher Details");
+        updateTeacher.setBounds(200, 15, 170, 30);
+        updateTeacher.setBackground(adminSubPanel.getBackground());
+
+        ButtonGroup RadioButtonGroup = new ButtonGroup();
+        RadioButtonGroup.add(updateStudent);
+        RadioButtonGroup.add(updateTeacher);
+
+        // Update Student
+
+        updateStudent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Student Update Triggered");
+
+                JLabel rollnumberLabel = new JLabel("Select Roll Number ");
+                rollnumberLabel.setBounds(20, 70, 170, 16);
+                rollnumberLabel.setFont(new Font("Consolas", Font.BOLD, 16));
+
+                Choice rollnoChoice = new Choice();
+                rollnoChoice.setBounds(200, 65, 120, 16);
+                rollnoChoice.add("-- Select Roll No --");
+
+                try {
+                    ResultSet rs = stmt.executeQuery("SELECT Roll_No FROM students ORDER BY Roll_No ASC;");
+                    while (rs.next()) {
+                        rollnoChoice.add(rs.getString("Roll_No"));
+                    }
+                } catch (Exception p) {
+                    p.printStackTrace();
+                }
+
+                JLabel name = new JLabel("Name :");
+                name.setFont(new Font("Consolas", Font.PLAIN, 16));
+                name.setBounds(20, 120, 200, 30);
+
+                JLabel nameLabel = new JLabel();
+                nameLabel.setBounds(160, 120, 200, 30);
+                nameLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+
+                JLabel father_name = new JLabel("Father's Name :");
+                father_name.setFont(new Font("Consolas", Font.PLAIN, 16));
+                father_name.setBounds(20, 150, 200, 30);
+
+                JTextField new_father_name = new JTextField();
+                new_father_name.setBounds(160, 150, 200, 25);
+
+                JLabel dob = new JLabel("Date of Birth :");
+                dob.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dob.setBounds(20, 180, 200, 30);
+
+                JLabel dobLabel = new JLabel();
+                dobLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dobLabel.setBounds(160, 180, 200, 30);
+
+                JLabel address = new JLabel("Address :");
+                address.setFont(new Font("Consolas", Font.PLAIN, 16));
+                address.setBounds(20, 210, 180, 25);
+
+                JTextField new_address = new JTextField();
+                new_address.setBounds(110, 210, 250, 25);
+
+                JLabel contact = new JLabel("Mobile :");
+                contact.setFont(new Font("Consolas", Font.PLAIN, 16));
+                contact.setBounds(380, 120, 200, 30);
+
+                JTextField new_contact = new JTextField();
+                new_contact.setBounds(460, 120, 220, 25);
+
+                JLabel email = new JLabel("Email : ");
+                email.setFont(new Font("Consolas", Font.PLAIN, 16));
+                email.setBounds(380, 150, 200, 30);
+
+                JLabel emailLabel = new JLabel();
+                emailLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                emailLabel.setBounds(460, 150, 220, 30);
+
+                JLabel course = new JLabel("Course :");
+                course.setFont(new Font("Consolas", Font.PLAIN, 16));
+                course.setBounds(380, 180, 200, 30);
+
+                JLabel courseLabel = new JLabel();
+                courseLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                courseLabel.setBounds(460, 180, 220, 30);
+
+                JLabel branch = new JLabel("Branch :");
+                branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branch.setBounds(380, 210, 200, 30);
+
+                JTextArea branchTaxtArea = new JTextArea();
+                branchTaxtArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branchTaxtArea.setLineWrap(true);
+                branchTaxtArea.setWrapStyleWord(true);
+                branchTaxtArea.setOpaque(false);
+                branchTaxtArea.setBounds(460, 215, 220, 60);
+
+                MyButtonGreen submitButton = new MyButtonGreen("Submit");
+                submitButton.setBounds(250, 300, 100, 25);
+                adminSubPanel.add(submitButton);
+                submitButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            String updateQuery = "UPDATE students SET Fathers_name=?, Address=?, Contact_no=? WHERE Email_id=?;";
+                            PreparedStatement pstmt = con.prepareStatement(updateQuery);
+
+                            pstmt.setString(1, new_father_name.getText());
+                            pstmt.setString(2, new_address.getText());
+                            pstmt.setString(3, new_contact.getText());
+                            pstmt.setString(4, emailLabel.getText());
+
+                            pstmt.executeUpdate();
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
+                            JOptionPane.showMessageDialog(adminSubPanel,
+                                    "ERROR : Update Failed\nCheck console for details", "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+
+                // All Components are not visible by default
+
+                name.setVisible(false);
+                nameLabel.setVisible(false);
+                father_name.setVisible(false);
+                new_father_name.setVisible(false);
+                dobLabel.setVisible(false);
+                dob.setVisible(false);
+                address.setVisible(false);
+                new_address.setVisible(false);
+                contact.setVisible(false);
+                new_contact.setVisible(false);
+                email.setVisible(false);
+                emailLabel.setVisible(false);
+                course.setVisible(false);
+                courseLabel.setVisible(false);
+                branch.setVisible(false);
+                branchTaxtArea.setVisible(false);
+                submitButton.setVisible(false);
+
+                rollnoChoice.addItemListener(new ItemListener() {
+                    public void itemStateChanged(ItemEvent ie) {
+                        if ((rollnoChoice.getSelectedIndex() == 0) || (ie.getStateChange() == 0)) {
+                            // Components will be visible if Roll No is Selected
+                            name.setVisible(false);
+                            nameLabel.setVisible(false);
+                            father_name.setVisible(false);
+                            new_father_name.setVisible(false);
+                            dobLabel.setVisible(false);
+                            dob.setVisible(false);
+                            address.setVisible(false);
+                            new_address.setVisible(false);
+                            contact.setVisible(false);
+                            new_contact.setVisible(false);
+                            email.setVisible(false);
+                            emailLabel.setVisible(false);
+                            course.setVisible(false);
+                            courseLabel.setVisible(false);
+                            branch.setVisible(false);
+                            branchTaxtArea.setVisible(false);
+                            submitButton.setVisible(false);
+                        } else {
+                            try {
+                                name.setVisible(true);
+                                nameLabel.setVisible(true);
+                                father_name.setVisible(true);
+                                new_father_name.setVisible(true);
+                                dobLabel.setVisible(true);
+                                dob.setVisible(true);
+                                address.setVisible(true);
+                                new_address.setVisible(true);
+                                contact.setVisible(true);
+                                new_contact.setVisible(true);
+                                email.setVisible(true);
+                                emailLabel.setVisible(true);
+                                course.setVisible(true);
+                                courseLabel.setVisible(true);
+                                branch.setVisible(true);
+                                branchTaxtArea.setVisible(true);
+                                submitButton.setVisible(true);
+
+                                String query = "select * from students,courses where Roll_No='"
+                                        + rollnoChoice.getSelectedItem() + "' and students.Course_ID=courses.Course_ID";
+                                ResultSet rs = stmt.executeQuery(query);
+                                rs.next();
+                                nameLabel.setText(rs.getString(2) + " " + rs.getString(3));
+                                new_father_name.setText(rs.getString(4));
+                                emailLabel.setText(rs.getString(5));
+                                dobLabel.setText(rs.getString(6));
+                                new_address.setText(rs.getString(7));
+                                new_contact.setText(rs.getString(8));
+                                courseLabel.setText(rs.getString(11));
+                                branchTaxtArea.setText(rs.getString(12));
+                            } catch (Exception c) {
+                                c.printStackTrace();
+                            }
+                        }
+                    }
+                });
+
+                adminSubPanel.add(rollnumberLabel);
+                adminSubPanel.add(rollnoChoice);
+                adminSubPanel.add(name);
+                adminSubPanel.add(nameLabel);
+                adminSubPanel.add(father_name);
+                adminSubPanel.add(new_father_name);
+                adminSubPanel.add(dobLabel);
+                adminSubPanel.add(dob);
+                adminSubPanel.add(address);
+                adminSubPanel.add(new_address);
+                adminSubPanel.add(contact);
+                adminSubPanel.add(new_contact);
+                adminSubPanel.add(email);
+                adminSubPanel.add(emailLabel);
+                adminSubPanel.add(course);
+                adminSubPanel.add(courseLabel);
+                adminSubPanel.add(branch);
+                adminSubPanel.add(branchTaxtArea);
+                adminPanel.revalidate();
+                adminPanel.repaint();
+            }
+        });
+
+        adminSubPanel.add(updateStudent);
+        adminSubPanel.add(updateTeacher);
+        adminPanel.add(adminSubPanel);
+        adminPanel.revalidate();
+        adminPanel.repaint();
+        adminSubPanel.setVisible(true);
+    }
     // LOGOUT Button Method
 
     void logoutBtn(JPanel removePanel) {
