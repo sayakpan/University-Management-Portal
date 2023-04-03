@@ -121,7 +121,6 @@ public class Student {
     }
 
     class MyButtonGreen extends MyButtonBlue {
-
         MyButtonGreen(String text) {
             super(text);
             setBackground(greenColor);
@@ -191,7 +190,7 @@ public class Student {
     // Main Window Starting
 
     void window() {
-        frame = new JFrame("Student Management System");
+        frame = new JFrame("University Management Portal");
         frame.setSize(1080, 720);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
@@ -206,8 +205,8 @@ public class Student {
         JPasswordField passField;
         MyButtonBlue loginButton;
 
-        h1 = new JLabel("Student Management System");
-        h1.setBounds(250, 50, 700, 50);
+        h1 = new JLabel("University Management Portal");
+        h1.setBounds(210, 50, 700, 50);
         h1.setFont(new Font("Consolas", Font.PLAIN, 30));
 
         loginPanel = new JPanel();
@@ -246,7 +245,7 @@ public class Student {
         errorMsg.setBounds(520, 400, 300, 25);
 
         loginButton = new MyButtonBlue("Login");
-        loginButton.setBounds(620, 430, 90, 25);
+        loginButton.setBounds(610, 430, 110, 25);
         loginButton.addActionListener(new ActionListener() {
 
             @Override
