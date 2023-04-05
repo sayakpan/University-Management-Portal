@@ -32,8 +32,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableColumnModel;
 
 public class Student {
     Connection con;
@@ -776,6 +780,14 @@ public class Student {
             }
         });
 
+        searchMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
+                SearchProfile();
+            }
+        });
+
         adminPanel.add(menuBar);
         frame.add(adminPanel);
         adminPanel.add(h1);
@@ -1259,6 +1271,135 @@ public class Student {
         adminPanel.repaint();
         adminSubPanel.setVisible(true);
     }
+
+    // Method to Search any Existing Profile from Admin
+
+    void SearchProfile() {
+        JRadioButton searchStudent = new JRadioButton("Search Student Profile");
+        searchStudent.setBounds(20, 15, 170, 30);
+        searchStudent.setBackground(adminSubPanel.getBackground());
+
+        JRadioButton searchTeacher = new JRadioButton("Search Teacher Profile");
+        searchTeacher.setBounds(195, 15, 170, 30);
+        searchTeacher.setBackground(adminSubPanel.getBackground());
+
+        ButtonGroup RadioButtonGroup = new ButtonGroup();
+        RadioButtonGroup.add(searchStudent);
+        RadioButtonGroup.add(searchTeacher);
+
+        searchStudent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JTextField searchBar = new JTextField();
+                searchBar.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                searchBar.setBounds(20, 50, 300, 25);
+
+                MyButtonGreen searchButton = new MyButtonGreen("Search");
+                searchButton.setBounds(330, 50, 70, 25);
+
+                JLabel countResult = new JLabel();
+                countResult.setBounds(410, 60, 200, 25);
+                countResult.setFont(new Font("Arial", Font.PLAIN, 12));
+
+                DefaultTableModel model = new DefaultTableModel() {
+                    public boolean isCellEditable(int row, int column) { // To Restrict Cell Editability
+                        return false;
+                    };
+                };
+
+                // Table Columns
+                model.addColumn("Roll No");
+                model.addColumn("Name");
+                model.addColumn("Email");
+                model.addColumn("DOB");
+                model.addColumn("Course");
+                model.addColumn("Branch");
+
+                // Query to Fetch Table Data
+
+                try {
+                    String searchQuery = "Select * from students,courses where students.Course_ID=courses.Course_ID LIMIT 0,20;";
+                    ResultSet searchResult = stmt.executeQuery(searchQuery);
+                    while (searchResult.next()) {
+                        model.addRow(new String[] {
+                                searchResult.getString("Roll_No"),
+                                searchResult.getString("First_name") + " " + searchResult.getString("Last_name"),
+                                searchResult.getString("Email_id"),
+                                searchResult.getString("Date_of_birth"),
+                                searchResult.getString("Course_Name"),
+                                searchResult.getString("Branch")
+                        });
+                    }
+                } catch (Exception e1) {
+                    e1.getStackTrace();
+                }
+
+                JTable resultTable = new JTable(model);
+                resultTable.setRowHeight(22);
+
+                TableColumnModel columnModel = resultTable.getColumnModel();
+                columnModel.getColumn(0).setPreferredWidth(50);
+                columnModel.getColumn(1).setPreferredWidth(100);
+                columnModel.getColumn(2).setPreferredWidth(170);
+                columnModel.getColumn(3).setPreferredWidth(80);
+                columnModel.getColumn(4).setPreferredWidth(60);
+                columnModel.getColumn(5).setPreferredWidth(200);
+
+                JScrollPane tableScrollPane = new JScrollPane(resultTable);
+                tableScrollPane.getViewport().add(resultTable);
+                tableScrollPane.setBounds(20, 90, 660, 290);
+
+                // Search Button Action Listener
+                searchButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String searchKey = searchBar.getText();
+                        model.setRowCount(0);
+
+                        try {
+                            String searchQuery = "SELECT * FROM students JOIN courses ON students.Course_ID=courses.Course_ID WHERE CONCAT(First_name, ' ', Last_name) LIKE ? ;";
+                            PreparedStatement pstmt = con.prepareStatement(searchQuery);
+                            pstmt.setString(1, searchKey + "%");
+                            ResultSet searchResult = pstmt.executeQuery();
+
+                            while (searchResult.next()) {
+                                model.addRow(new String[] {
+                                        searchResult.getString("Roll_No"),
+                                        searchResult.getString("First_name") + " "
+                                                + searchResult.getString("Last_name"),
+                                        searchResult.getString("Email_id"),
+                                        searchResult.getString("Date_of_birth"),
+                                        searchResult.getString("Course_Name"),
+                                        searchResult.getString("Branch")
+                                });
+                            }
+                            countResult.setText(model.getRowCount() + " Results");
+                        } catch (Exception e1) {
+                            e1.getStackTrace();
+                        }
+
+                    }
+                });
+
+                adminSubPanel.add(searchBar);
+                adminSubPanel.add(searchButton);
+                adminSubPanel.add(countResult);
+                adminSubPanel.add(tableScrollPane);
+
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
+            }
+        });
+
+        adminSubPanel.add(searchStudent);
+        adminSubPanel.add(searchTeacher);
+
+        adminPanel.add(adminSubPanel);
+        adminPanel.revalidate();
+        adminPanel.repaint();
+
+    }
+
     // LOGOUT Button Method
 
     void logoutBtn(JPanel removePanel) {
