@@ -780,7 +780,8 @@ public class Student {
         frame.add(adminPanel);
         adminPanel.add(h1);
         logoutBtn(adminPanel);
-
+        adminPanel.repaint();
+        adminPanel.validate();
         frame.setVisible(true);
     }
 
@@ -1000,19 +1001,221 @@ public class Student {
                 adminSubPanel.add(courseComboBox);
                 adminSubPanel.add(contactField);
                 adminSubPanel.add(emailField);
-
-                adminPanel.revalidate();
-                adminPanel.repaint();
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
+                addTeacher.setVisible(false);
             }
         });
+
+           // Add Teacher Details 
 
         addTeacher.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Teacher");
-            }
-        });
+                JLabel id = new JLabel("Id : Automatic");
+                id.setFont(new Font("Consolas", Font.PLAIN, 16));
+                id.setBounds(20, 70, 200, 30);
 
+                JLabel fname = new JLabel("First Name :");
+                fname.setFont(new Font("Consolas", Font.PLAIN, 16));
+                fname.setBounds(20, 100, 200, 30);
+
+                JLabel lname = new JLabel("Last Name :");
+                lname.setFont(new Font("Consolas", Font.PLAIN, 16));
+                lname.setBounds(380, 100, 200, 30);
+
+                JLabel designation = new JLabel("Designation :");
+                designation.setFont(new Font("Consolas", Font.PLAIN, 16));
+                designation.setBounds(20, 130, 200, 30);
+
+                JLabel dob = new JLabel("Date of Birth :");
+                dob.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dob.setBounds(20, 160, 200, 30);
+
+                JLabel address = new JLabel("Address :");
+                address.setFont(new Font("Consolas", Font.PLAIN, 16));
+                address.setBounds(20, 190, 100, 30);
+
+                JLabel contact = new JLabel("Mobile :");
+                contact.setFont(new Font("Consolas", Font.PLAIN, 16));
+                contact.setBounds(380, 130, 200, 30);
+
+                JLabel email = new JLabel("Email : ");
+                email.setFont(new Font("Consolas", Font.PLAIN, 16));
+                email.setBounds(380, 160, 200, 30);
+
+                JLabel course = new JLabel("Course :");
+                course.setFont(new Font("Consolas", Font.PLAIN, 16));
+                course.setBounds(380, 190, 200, 30);
+
+                JTextField fnameField = new JTextField();
+                fnameField.setBounds(160, 100, 200, 25);
+
+                JTextField lnameField = new JTextField();
+                lnameField.setBounds(480, 100, 200, 25);
+
+                JTextField designationField = new JTextField();
+                designationField.setBounds(160, 130, 200, 25);
+
+                JTextField dobField = new JTextField("YYYY-MM-DD");
+                dobField.setBounds(160, 160, 200, 25);
+
+                JTextField addressField = new JTextField();
+                addressField.setBounds(160, 190, 200, 55);
+
+                JTextField contactField = new JTextField("+91 ");
+                contactField.setBounds(480, 130, 200, 25);
+
+                JTextField emailField = new JTextField();
+                emailField.setBounds(480, 160, 200, 25);
+
+                JLabel branch = new JLabel("Branch :");
+                branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branch.setBounds(380, 220, 200, 30);
+
+                String[] branchList = { "-- Select Branch --", "Mechanical Engineering",
+                        "Electronics and Communication Engineering", "Electrical Engineering",
+                        "Computer Science Engineering", "Civil Engineering" };
+                JComboBox<String> branchComboBox = new JComboBox<String>(branchList);
+                branchComboBox.setBounds(480, 220, 200, 25);
+
+                String[] courseList = { "-- Select Course --", "BCA", "MCA", "BTECH", "BBA", "MBA" };
+                JComboBox<String> courseComboBox = new JComboBox<String>(courseList);
+                courseComboBox.setBounds(480, 190, 200, 25);
+                courseComboBox.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (courseComboBox.getSelectedItem().equals("BTECH")) {
+                            adminSubPanel.add(branch);
+                            adminSubPanel.add(branchComboBox);
+                        } else {
+                            adminSubPanel.remove(branch);
+                            adminSubPanel.remove(branchComboBox);
+                        }
+                        adminSubPanel.revalidate();
+                        adminSubPanel.repaint();
+                    }
+                });
+
+                MyButtonGreen submitButton = new MyButtonGreen("Submit");
+                submitButton.setBounds(250, 280, 100, 25);
+                submitButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // Check if all fields are filled and ComboBox are Selected
+                        Component[] components = adminSubPanel.getComponents();
+                        for (Component component : components) {
+                            if (component instanceof JTextField) {
+                                JTextField textField = (JTextField) component;
+                                if (textField.getText().trim().isEmpty()) {
+                                    JOptionPane.showMessageDialog(adminSubPanel, "Please fill in all fields.",
+                                            "Empty Field",
+                                            JOptionPane.WARNING_MESSAGE);
+                                    return;
+                                }
+                            }
+                            if (component instanceof JComboBox) {
+                                JComboBox<?> comboBox = (JComboBox<?>) component;
+                                if (comboBox.getSelectedIndex() == 0) {
+                                    JOptionPane.showMessageDialog(adminSubPanel,
+                                            "Please select an item from the drop-down list.", "Empty Drop-Down",
+                                            JOptionPane.WARNING_MESSAGE);
+                                    return;
+                                }
+                            }
+                        }
+                        // Run Ouery to Fetch Course ID
+                        String query;
+                        if (courseComboBox.getSelectedItem().equals("BTECH")) {
+                            query = "select Course_ID from courses where Course_Name='BTECH'and Branch='"
+                                    + branchComboBox.getSelectedItem() + "';";
+                        } else {
+                            query = "select Course_ID from courses where Course_Name='"
+                                    + courseComboBox.getSelectedItem() + "';";
+                        }
+                        System.out.println(query);
+                        try {
+                            result = stmt.executeQuery(query);
+                            result.next();
+                            // Prepared Statement is used to prevent SQL injection attacks
+                            String InsertQuery = "INSERT INTO teachers (First_name, Last_name, Designation, Email_id, Date_of_birth, Address, Contact_no, Course_ID) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                            PreparedStatement preparedStmt = con.prepareStatement(InsertQuery);
+                            preparedStmt.setString(1, fnameField.getText());
+                            preparedStmt.setString(2, lnameField.getText());
+                            preparedStmt.setString(3, designationField.getText());
+                            preparedStmt.setString(4, emailField.getText());
+                            preparedStmt.setString(5, dobField.getText());
+                            preparedStmt.setString(6, addressField.getText());
+                            preparedStmt.setString(7, contactField.getText());
+                            preparedStmt.setInt(8, result.getInt(1));
+                            // preparedStmt.executeUpdate();
+                            System.out.println(preparedStmt);
+                            ImageIcon doneIcon = new ImageIcon("src//Assets//done.png");
+                            Image doneImage = doneIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
+                            JOptionPane.showMessageDialog(adminSubPanel,
+                                    "Insertion Done !\nUser Name : " + emailField.getText()
+                                            + "\nPassword : DOB in DDMMYYYY format.",
+                                    "Insertion Done",
+                                    JOptionPane.INFORMATION_MESSAGE, new ImageIcon(doneImage));
+                        } catch (SQLException e1) {
+                            JOptionPane.showMessageDialog(adminSubPanel,
+                                    "ERROR : Profile Creation Failed\nCheck console for details", "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                            e1.printStackTrace();
+                        }
+                    }
+                });
+
+                MyButtonWhite clearButton = new MyButtonWhite("Clear");
+                clearButton.setBounds(360, 280, 100, 25);
+                clearButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        Component[] components = adminSubPanel.getComponents();
+                        for (Component comp : components) {
+                            if (comp instanceof JTextField) {
+                                JTextField textField = (JTextField) comp;
+                                textField.setText("");
+                            }
+                            if (comp instanceof JComboBox) {
+                                JComboBox<?> comboBox = (JComboBox<?>) comp;
+                                comboBox.setSelectedIndex(0);
+                            }
+                        }
+                        JOptionPane.showMessageDialog(adminSubPanel, "Cleared all Inputs !", "Cleared",
+                                JOptionPane.INFORMATION_MESSAGE);
+                    }
+                });
+
+                adminSubPanel.add(submitButton);
+                adminSubPanel.add(clearButton);
+
+                adminSubPanel.add(designation);
+                adminSubPanel.add(lname);
+                adminSubPanel.add(id);
+                adminSubPanel.add(fname);
+                adminSubPanel.add(dob);
+                adminSubPanel.add(address);
+                adminSubPanel.add(course);
+                adminSubPanel.add(contact);
+                adminSubPanel.add(email);
+
+                adminSubPanel.add(fnameField);
+                adminSubPanel.add(lnameField);
+                adminSubPanel.add(designationField);
+                adminSubPanel.add(dobField);
+                adminSubPanel.add(addressField);
+                adminSubPanel.add(courseComboBox);
+                adminSubPanel.add(contactField);
+                adminSubPanel.add(emailField);
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
+                addStudent.setVisible(false);
+                
+            }
+            
+        });
         adminSubPanel.add(addStudent);
         adminSubPanel.add(addTeacher);
 
@@ -1027,6 +1230,7 @@ public class Student {
         JRadioButton updateStudent = new JRadioButton("Update Student Details");
         updateStudent.setBounds(20, 15, 170, 30);
         updateStudent.setBackground(adminSubPanel.getBackground());
+
 
         JRadioButton updateTeacher = new JRadioButton("Update Teacher Details");
         updateTeacher.setBounds(200, 15, 170, 30);
@@ -1072,7 +1276,7 @@ public class Student {
                 father_name.setFont(new Font("Consolas", Font.PLAIN, 16));
                 father_name.setBounds(20, 150, 200, 30);
 
-                JTextField new_father_name = new JTextField();
+                JTextField new_father_name= new JTextField();
                 new_father_name.setBounds(160, 150, 200, 25);
 
                 JLabel dob = new JLabel("Date of Birth :");
@@ -1247,8 +1451,228 @@ public class Student {
                 adminSubPanel.add(courseLabel);
                 adminSubPanel.add(branch);
                 adminSubPanel.add(branchTaxtArea);
-                adminPanel.revalidate();
-                adminPanel.repaint();
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
+              updateTeacher.setVisible(false);
+         }
+        });
+
+        // Update Teacher
+        updateTeacher.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Teacher Update Triggered");
+
+                JLabel idLabel = new JLabel("Select Id ");
+                idLabel.setBounds(20, 70, 170, 16);
+                idLabel.setFont(new Font("Consolas", Font.BOLD, 16));
+
+                Choice idChoice = new Choice();
+                idChoice.setBounds(200, 65, 120, 16);
+                idChoice.add("-- Select id --");
+
+                try {
+                    ResultSet rs = stmt.executeQuery("SELECT Teacher_ID FROM teachers ORDER BY Teacher_ID ASC;");
+                    while (rs.next()) {
+                        idChoice.add(rs.getString("Teacher_ID"));
+                    }
+                } catch (Exception p) {
+                    p.printStackTrace();
+                }
+
+                JLabel name = new JLabel("Name :");
+                name.setFont(new Font("Consolas", Font.PLAIN, 16));
+                name.setBounds(20, 120, 200, 30);
+
+                JLabel nameLabel = new JLabel();
+                nameLabel.setBounds(160, 120, 200, 30);
+                nameLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+
+                JLabel designation = new JLabel("Designation :");
+                designation.setFont(new Font("Consolas", Font.PLAIN, 16));
+                designation.setBounds(20, 150, 200, 30);
+
+                JTextField new_designation= new JTextField();
+                new_designation.setBounds(160, 150, 200, 25);
+
+                JLabel dob = new JLabel("Date of Birth :");
+                dob.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dob.setBounds(20, 180, 200, 30);
+
+                JLabel dobLabel = new JLabel();
+                dobLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dobLabel.setBounds(160, 180, 200, 30);
+
+                JLabel address = new JLabel("Address :");
+                address.setFont(new Font("Consolas", Font.PLAIN, 16));
+                address.setBounds(20, 210, 180, 25);
+
+                JTextField new_address = new JTextField();
+                new_address.setBounds(110, 210, 250, 25);
+
+                JLabel contact = new JLabel("Mobile :");
+                contact.setFont(new Font("Consolas", Font.PLAIN, 16));
+                contact.setBounds(380, 120, 200, 30);
+
+                JTextField new_contact = new JTextField();
+                new_contact.setBounds(460, 120, 220, 25);
+
+                JLabel email = new JLabel("Email : ");
+                email.setFont(new Font("Consolas", Font.PLAIN, 16));
+                email.setBounds(380, 150, 200, 30);
+
+                JLabel emailLabel = new JLabel();
+                emailLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                emailLabel.setBounds(460, 150, 220, 30);
+
+                JLabel course = new JLabel("Course :");
+                course.setFont(new Font("Consolas", Font.PLAIN, 16));
+                course.setBounds(380, 180, 200, 30);
+
+                JLabel courseLabel = new JLabel();
+                courseLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                courseLabel.setBounds(460, 180, 220, 30);
+
+                JLabel branch = new JLabel("Branch :");
+                branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branch.setBounds(380, 210, 200, 30);
+
+                JTextArea branchTaxtArea = new JTextArea();
+                branchTaxtArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branchTaxtArea.setLineWrap(true);
+                branchTaxtArea.setWrapStyleWord(true);
+                branchTaxtArea.setOpaque(false);
+                branchTaxtArea.setBounds(460, 215, 220, 60);
+
+                MyButtonGreen submitButton = new MyButtonGreen("Submit");
+                submitButton.setBounds(250, 300, 100, 25);
+                adminSubPanel.add(submitButton);
+                submitButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            String updateQuery = "UPDATE teachers SET Designation=?, Address=?, Contact_no=? WHERE Email_id=?;";
+                            PreparedStatement pstmt = con.prepareStatement(updateQuery);
+
+                            pstmt.setString(1, new_designation.getText());
+                            pstmt.setString(2, new_address.getText());
+                            pstmt.setString(3, new_contact.getText());
+                            pstmt.setString(4, emailLabel.getText());
+
+                            pstmt.executeUpdate();
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
+                            JOptionPane.showMessageDialog(adminSubPanel,
+                                    "ERROR : Update Failed\nCheck console for details", "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+
+                // All Components are not visible by default
+
+                name.setVisible(false);
+                nameLabel.setVisible(false);
+               designation.setVisible(false);
+                new_designation.setVisible(false);
+                dobLabel.setVisible(false);
+                dob.setVisible(false);
+                address.setVisible(false);
+                new_address.setVisible(false);
+                contact.setVisible(false);
+                new_contact.setVisible(false);
+                email.setVisible(false);
+                emailLabel.setVisible(false);
+                course.setVisible(false);
+                courseLabel.setVisible(false);
+                branch.setVisible(false);
+                branchTaxtArea.setVisible(false);
+                submitButton.setVisible(false);
+                
+
+               idChoice.addItemListener(new ItemListener() {
+                    public void itemStateChanged(ItemEvent ie) {
+                        if ((idChoice.getSelectedIndex() == 0) || (ie.getStateChange() == 0)) {
+                            // Components will be visible if ID is Selected
+                            name.setVisible(false);
+                            nameLabel.setVisible(false);
+                            designation.setVisible(false);
+                            new_designation.setVisible(false);
+                            dobLabel.setVisible(false);
+                            dob.setVisible(false);
+                            address.setVisible(false);
+                            new_address.setVisible(false);
+                            contact.setVisible(false);
+                            new_contact.setVisible(false);
+                            email.setVisible(false);
+                            emailLabel.setVisible(false);
+                            course.setVisible(false);
+                            courseLabel.setVisible(false);
+                            branch.setVisible(false);
+                            branchTaxtArea.setVisible(false);
+                            submitButton.setVisible(false);
+                        } else {
+                            try {
+                                name.setVisible(true);
+                                nameLabel.setVisible(true);
+                               designation.setVisible(true);
+                                new_designation.setVisible(true);
+                                dobLabel.setVisible(true);
+                                dob.setVisible(true);
+                                address.setVisible(true);
+                                new_address.setVisible(true);
+                                contact.setVisible(true);
+                                new_contact.setVisible(true);
+                                email.setVisible(true);
+                                emailLabel.setVisible(true);
+                                course.setVisible(true);
+                                courseLabel.setVisible(true);
+                                branch.setVisible(true);
+                                branchTaxtArea.setVisible(true);
+                                submitButton.setVisible(true);
+
+                                
+
+                                String query = "select * from teachers,courses where Teacher_ID='"
+                                        +idChoice.getSelectedItem() + "' and teachers.Course_ID=courses.Course_ID";
+                                ResultSet rs = stmt.executeQuery(query);
+                                rs.next();
+                                nameLabel.setText(rs.getString(2) + " " + rs.getString(3));
+                                new_designation.setText(rs.getString(4));
+                                emailLabel.setText(rs.getString(5));
+                                dobLabel.setText(rs.getString(6));
+                                new_address.setText(rs.getString(7));
+                                new_contact.setText(rs.getString(8));
+                                courseLabel.setText(rs.getString(11));
+                                branchTaxtArea.setText(rs.getString(12));
+                            } catch (Exception c) {
+                                c.printStackTrace();
+                            }
+                        }
+                    }
+                });
+
+                adminSubPanel.add(idLabel);
+                adminSubPanel.add(idChoice);
+                adminSubPanel.add(name);
+                adminSubPanel.add(nameLabel);
+                adminSubPanel.add(designation);
+                adminSubPanel.add(new_designation);
+                adminSubPanel.add(dobLabel);
+                adminSubPanel.add(dob);
+                adminSubPanel.add(address);
+                adminSubPanel.add(new_address);
+                adminSubPanel.add(contact);
+                adminSubPanel.add(new_contact);
+                adminSubPanel.add(email);
+                adminSubPanel.add(emailLabel);
+                adminSubPanel.add(course);
+                adminSubPanel.add(courseLabel);
+                adminSubPanel.add(branch);
+                adminSubPanel.add(branchTaxtArea);
+                updateStudent.setVisible(false);
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
             }
         });
 
@@ -1259,6 +1683,7 @@ public class Student {
         adminPanel.repaint();
         adminSubPanel.setVisible(true);
     }
+
     // LOGOUT Button Method
 
     void logoutBtn(JPanel removePanel) {
