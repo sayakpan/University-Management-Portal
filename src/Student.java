@@ -446,6 +446,8 @@ public class Student {
         frame.setVisible(true);
     }
 
+    // Modify Button Code For TeacherFrame
+
     private void modifyStudent(String email, JLabel father_name, JLabel address, JLabel contact) throws SQLException {
         final String fatherNameOld = father_name.getText();
         final String addressOld = address.getText();
@@ -830,7 +832,31 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 adminSubPanel.removeAll();
-                SearchProfile();
+                SearchExistingProfile();
+            }
+        });
+
+        removeMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
+                RemoveExistingProfile("default", "default");
+            }
+        });
+
+        feeMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
+                adminSubPanel.repaint();
+            }
+        });
+
+        examMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
+                adminSubPanel.repaint();
             }
         });
 
@@ -1725,6 +1751,12 @@ public class Student {
                     }
                 });
 
+                idChoice.select(key);
+                for (ItemListener listener : idChoice.getItemListeners()) {
+                    listener.itemStateChanged(new ItemEvent(idChoice, ItemEvent.ITEM_STATE_CHANGED, idChoice,
+                            ItemEvent.SELECTED));
+                }
+
                 adminSubPanel.add(idLabel);
                 adminSubPanel.add(idChoice);
                 adminSubPanel.add(name);
@@ -1765,7 +1797,7 @@ public class Student {
 
     // Method to Search any Existing Profile from Admin
 
-    void SearchProfile() {
+    void SearchExistingProfile() {
         JRadioButton searchStudent = new JRadioButton("Search Student Profile");
         searchStudent.setBounds(20, 15, 170, 30);
         searchStudent.setBackground(adminSubPanel.getBackground());
@@ -1912,6 +1944,164 @@ public class Student {
                                     UpdateExistingProfile(rollNo, "student");
                                 };
                             });
+                            deleteSelectedButon.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    RemoveExistingProfile(rollNo, "student");
+                                };
+                            });
+                        }
+                    }
+                });
+
+                adminSubPanel.add(searchBar);
+                adminSubPanel.add(searchButton);
+                adminSubPanel.add(countResult);
+                adminSubPanel.add(tableScrollPane);
+
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
+            }
+        });
+
+        searchTeacher.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
+                adminSubPanel.add(searchStudent);
+                adminSubPanel.add(searchTeacher);
+
+                MyButtonGreen searchButton = new MyButtonGreen("Search");
+                searchButton.setBounds(330, 50, 70, 25);
+
+                MyButtonYellow updateSelectedButton = new MyButtonYellow("Update");
+                updateSelectedButton.setBounds(520, 50, 70, 25);
+                adminSubPanel.add(updateSelectedButton);
+                updateSelectedButton.setVisible(false);
+
+                MyButtonRed deleteSelectedButon = new MyButtonRed("Delete");
+                deleteSelectedButon.setBounds(600, 50, 70, 25);
+                adminSubPanel.add(deleteSelectedButon);
+                deleteSelectedButon.setVisible(false);
+
+                JTextField searchBar = new JTextField();
+                searchBar.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                searchBar.setBounds(20, 50, 300, 25);
+                searchBar.addActionListener(new ActionListener() { // Performs Search on Clicking "Enter"
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        searchButton.doClick();
+                    }
+                });
+
+                JLabel countResult = new JLabel();
+                countResult.setBounds(410, 60, 200, 25);
+                countResult.setFont(new Font("Arial", Font.PLAIN, 12));
+
+                DefaultTableModel model = new DefaultTableModel() {
+                    public boolean isCellEditable(int row, int column) { // To Restrict Cell Editability
+                        return false;
+                    };
+                };
+
+                // Table Columns
+                model.addColumn("ID");
+                model.addColumn("Name");
+                model.addColumn("Email");
+                model.addColumn("DOB");
+                model.addColumn("Designation");
+                model.addColumn("Department");
+
+                // Query to Fetch Table Data
+
+                try {
+                    String searchQuery = "Select * from teachers,courses where teachers.Course_ID=courses.Course_ID LIMIT 0,20;";
+                    ResultSet searchResult = stmt.executeQuery(searchQuery);
+                    while (searchResult.next()) {
+                        model.addRow(new String[] {
+                                searchResult.getString("Teacher_ID"),
+                                searchResult.getString("First_name") + " " + searchResult.getString("Last_name"),
+                                searchResult.getString("Email_id"),
+                                searchResult.getString("Date_of_birth"),
+                                searchResult.getString("Designation"),
+                                searchResult.getString("Course_Name")
+                        });
+                    }
+                } catch (Exception e1) {
+                    e1.getStackTrace();
+                }
+
+                JTable resultTable = new JTable(model);
+                resultTable.setRowHeight(22);
+
+                TableColumnModel columnModel = resultTable.getColumnModel();
+                columnModel.getColumn(0).setPreferredWidth(60);
+                columnModel.getColumn(1).setPreferredWidth(100);
+                columnModel.getColumn(2).setPreferredWidth(170);
+                columnModel.getColumn(3).setPreferredWidth(80);
+                columnModel.getColumn(4).setPreferredWidth(120);
+                columnModel.getColumn(5).setPreferredWidth(130);
+
+                JScrollPane tableScrollPane = new JScrollPane(resultTable);
+                tableScrollPane.getViewport().add(resultTable);
+                tableScrollPane.setBounds(20, 90, 660, 290);
+
+                // Search Button Action Listener
+                searchButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String searchKey = searchBar.getText();
+                        model.setRowCount(0);
+
+                        try {
+                            String searchQuery = "SELECT * FROM teachers JOIN courses ON students.Course_ID=courses.Course_ID WHERE CONCAT(First_name, ' ', Last_name) LIKE ? ;";
+                            PreparedStatement pstmt = con.prepareStatement(searchQuery);
+                            pstmt.setString(1, searchKey + "%");
+                            ResultSet searchResult = pstmt.executeQuery();
+
+                            while (searchResult.next()) {
+                                model.addRow(new String[] {
+                                        searchResult.getString("Teacher_ID"),
+                                        searchResult.getString("First_name") + " "
+                                                + searchResult.getString("Last_name"),
+                                        searchResult.getString("Email_id"),
+                                        searchResult.getString("Date_of_birth"),
+                                        searchResult.getString("Designation"),
+                                        searchResult.getString("Course_Name")
+                                });
+                            }
+                            countResult.setText(model.getRowCount() + " Results");
+                        } catch (Exception e1) {
+                            e1.getStackTrace();
+                        }
+
+                    }
+                });
+
+                // Get Roll No from Selected Row
+
+                resultTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+                    @Override
+                    public void valueChanged(ListSelectionEvent event) {
+                        if (event.getValueIsAdjusting()) {
+                            return;
+                        }
+                        int selectedRow = resultTable.getSelectedRow();
+                        if (selectedRow != -1) {
+                            String id = resultTable.getValueAt(selectedRow, 0).toString();
+                            System.out.println(id);
+                            updateSelectedButton.setVisible(true);
+                            deleteSelectedButon.setVisible(true);
+
+                            updateSelectedButton.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    UpdateExistingProfile(id, "teacher");
+                                };
+                            });
+                            deleteSelectedButon.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    RemoveExistingProfile(id, "teacher");
+                                };
+                            });
                         }
                     }
                 });
@@ -1933,6 +2123,553 @@ public class Student {
         adminPanel.revalidate();
         adminPanel.repaint();
 
+    }
+
+    // Method to Update any Existing Profile from Admin
+
+    void RemoveExistingProfile(String key, String type) {
+        JRadioButton removeStudent = new JRadioButton("Remove Student Profile");
+        removeStudent.setBounds(20, 15, 170, 30);
+        removeStudent.setBackground(adminSubPanel.getBackground());
+
+        JRadioButton removeTeacher = new JRadioButton("Remove Teacher Profile");
+        removeTeacher.setBounds(200, 15, 170, 30);
+        removeTeacher.setBackground(adminSubPanel.getBackground());
+
+        ButtonGroup RadioButtonGroup = new ButtonGroup();
+        RadioButtonGroup.add(removeStudent);
+        RadioButtonGroup.add(removeTeacher);
+
+        adminSubPanel.add(removeStudent);
+        adminSubPanel.add(removeTeacher);
+
+        removeStudent.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Student Delete Triggered");
+
+                adminSubPanel.removeAll();
+                adminSubPanel.add(removeStudent);
+                adminSubPanel.add(removeTeacher);
+
+                JLabel rollnumberLabel = new JLabel("Select Roll Number ");
+                rollnumberLabel.setBounds(20, 70, 170, 16);
+                rollnumberLabel.setFont(new Font("Consolas", Font.BOLD, 16));
+
+                Choice rollnoChoice = new Choice();
+                rollnoChoice.setBounds(200, 65, 120, 16);
+                rollnoChoice.add("-- Select Roll No --");
+                adminSubPanel.add(rollnoChoice);
+
+                try {
+                    ResultSet rs = stmt.executeQuery("SELECT Roll_No FROM students ORDER BY Roll_No ASC;");
+                    while (rs.next()) {
+                        rollnoChoice.add(rs.getString("Roll_No"));
+                    }
+                } catch (Exception p) {
+                    p.printStackTrace();
+                }
+
+                JLabel name = new JLabel("Name :");
+                name.setFont(new Font("Consolas", Font.PLAIN, 16));
+                name.setBounds(20, 120, 60, 30);
+
+                JLabel nameLabel = new JLabel();
+                nameLabel.setBounds(80, 120, 200, 30);
+                nameLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+
+                JLabel father_name = new JLabel("Father's Name :");
+                father_name.setFont(new Font("Consolas", Font.PLAIN, 16));
+                father_name.setBounds(20, 150, 200, 30);
+
+                JLabel father_name_Label = new JLabel();
+                father_name_Label.setFont(new Font("Consolas", Font.PLAIN, 16));
+                father_name_Label.setBounds(160, 150, 200, 30);
+
+                JLabel dob = new JLabel("Date of Birth :");
+                dob.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dob.setBounds(20, 180, 200, 30);
+
+                JLabel dobLabel = new JLabel();
+                dobLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dobLabel.setBounds(160, 180, 200, 30);
+
+                JLabel address = new JLabel("Address :");
+                address.setFont(new Font("Consolas", Font.PLAIN, 16));
+                address.setBounds(20, 210, 180, 25);
+
+                JTextArea addressArea = new JTextArea();
+                addressArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+                addressArea.setLineWrap(true);
+                addressArea.setWrapStyleWord(true);
+                addressArea.setOpaque(false);
+                addressArea.setBounds(110, 210, 250, 60);
+
+                JLabel contact = new JLabel("Mobile :");
+                contact.setFont(new Font("Consolas", Font.PLAIN, 16));
+                contact.setBounds(380, 120, 200, 30);
+
+                JLabel contactLabel = new JLabel();
+                contactLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                contactLabel.setBounds(460, 120, 220, 30);
+
+                JLabel email = new JLabel("Email : ");
+                email.setFont(new Font("Consolas", Font.PLAIN, 16));
+                email.setBounds(380, 150, 200, 30);
+
+                JLabel emailLabel = new JLabel();
+                emailLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                emailLabel.setBounds(460, 150, 220, 30);
+
+                JLabel course = new JLabel("Course :");
+                course.setFont(new Font("Consolas", Font.PLAIN, 16));
+                course.setBounds(380, 180, 200, 30);
+
+                JLabel courseLabel = new JLabel();
+                courseLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                courseLabel.setBounds(460, 180, 220, 30);
+
+                JLabel branch = new JLabel("Branch :");
+                branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branch.setBounds(380, 210, 200, 30);
+
+                JTextArea branchTextArea = new JTextArea();
+                branchTextArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branchTextArea.setLineWrap(true);
+                branchTextArea.setWrapStyleWord(true);
+                branchTextArea.setOpaque(false);
+                branchTextArea.setBounds(460, 215, 220, 60);
+
+                MyButtonRed deleteButton = new MyButtonRed("Delete");
+                deleteButton.setBounds(250, 300, 100, 25);
+                adminSubPanel.add(deleteButton);
+                deleteButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            int deleteConfirm = JOptionPane.showConfirmDialog(adminSubPanel, "Confirm Delete ?",
+                                    "Delete", JOptionPane.YES_NO_OPTION);
+                            if (deleteConfirm == JOptionPane.YES_OPTION) {
+                                String removeQuery = "DELETE FROM students WHERE Email_id = ?";
+                                PreparedStatement pstmt = con.prepareStatement(removeQuery);
+                                pstmt.setString(1, emailLabel.getText());
+                                pstmt.executeUpdate();
+                                String currentRoll = rollnoChoice.getSelectedItem();
+                                System.out.println(currentRoll);
+                                rollnoChoice.select(0);
+                                rollnoChoice.remove(currentRoll);
+
+                                name.setVisible(false);
+                                nameLabel.setVisible(false);
+                                father_name.setVisible(false);
+                                father_name_Label.setVisible(false);
+                                dobLabel.setVisible(false);
+                                dob.setVisible(false);
+                                address.setVisible(false);
+                                addressArea.setVisible(false);
+                                contact.setVisible(false);
+                                contactLabel.setVisible(false);
+                                email.setVisible(false);
+                                emailLabel.setVisible(false);
+                                course.setVisible(false);
+                                courseLabel.setVisible(false);
+                                branch.setVisible(false);
+                                branchTextArea.setVisible(false);
+                                deleteButton.setVisible(false);
+
+                                adminSubPanel.repaint();
+                                adminSubPanel.revalidate();
+                                JOptionPane.showMessageDialog(adminSubPanel, "Profile deleted successfully!", "Success",
+                                        JOptionPane.INFORMATION_MESSAGE);
+                            } else {
+                                return;
+                            }
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
+                            JOptionPane.showMessageDialog(adminSubPanel,
+                                    "ERROR : Delete Failed\nCheck console for details", "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+
+                // All Components are not visible by default
+
+                name.setVisible(false);
+                nameLabel.setVisible(false);
+                father_name.setVisible(false);
+                father_name_Label.setVisible(false);
+                dobLabel.setVisible(false);
+                dob.setVisible(false);
+                address.setVisible(false);
+                addressArea.setVisible(false);
+                contact.setVisible(false);
+                contactLabel.setVisible(false);
+                email.setVisible(false);
+                emailLabel.setVisible(false);
+                course.setVisible(false);
+                courseLabel.setVisible(false);
+                branch.setVisible(false);
+                branchTextArea.setVisible(false);
+                deleteButton.setVisible(false);
+
+                rollnoChoice.addItemListener(new ItemListener() {
+                    public void itemStateChanged(ItemEvent ie) {
+                        if ((rollnoChoice.getSelectedIndex() == 0) || (ie.getStateChange() == 0)) {
+                            // Components will be visible if Roll No is Selected
+                            name.setVisible(false);
+                            nameLabel.setVisible(false);
+                            father_name.setVisible(false);
+                            father_name_Label.setVisible(false);
+                            dobLabel.setVisible(false);
+                            dob.setVisible(false);
+                            address.setVisible(false);
+                            addressArea.setVisible(false);
+                            contact.setVisible(false);
+                            contactLabel.setVisible(false);
+                            email.setVisible(false);
+                            emailLabel.setVisible(false);
+                            course.setVisible(false);
+                            courseLabel.setVisible(false);
+                            branch.setVisible(false);
+                            branchTextArea.setVisible(false);
+                            deleteButton.setVisible(false);
+                        } else {
+                            try {
+                                name.setVisible(true);
+                                nameLabel.setVisible(true);
+                                father_name.setVisible(true);
+                                father_name_Label.setVisible(true);
+                                dobLabel.setVisible(true);
+                                dob.setVisible(true);
+                                address.setVisible(true);
+                                addressArea.setVisible(true);
+                                contact.setVisible(true);
+                                contactLabel.setVisible(true);
+                                email.setVisible(true);
+                                emailLabel.setVisible(true);
+                                course.setVisible(true);
+                                courseLabel.setVisible(true);
+                                branch.setVisible(true);
+                                branchTextArea.setVisible(true);
+                                deleteButton.setVisible(true);
+
+                                String query = "select * from students,courses where Roll_No='"
+                                        + rollnoChoice.getSelectedItem()
+                                        + "' and students.Course_ID=courses.Course_ID";
+                                ResultSet rs = stmt.executeQuery(query);
+                                rs.next();
+                                nameLabel.setText(rs.getString(2) + " " + rs.getString(3));
+                                father_name_Label.setText(rs.getString(4));
+                                emailLabel.setText(rs.getString(5));
+                                dobLabel.setText(rs.getString(6));
+                                addressArea.setText(rs.getString(7));
+                                contactLabel.setText(rs.getString(8));
+                                courseLabel.setText(rs.getString(11));
+                                branchTextArea.setText(rs.getString(12));
+                            } catch (Exception c) {
+                                c.printStackTrace();
+                            }
+                        }
+                    }
+                });
+
+                rollnoChoice.select(key);
+                for (ItemListener listener : rollnoChoice.getItemListeners()) {
+                    listener.itemStateChanged(new ItemEvent(rollnoChoice, ItemEvent.ITEM_STATE_CHANGED, rollnoChoice,
+                            ItemEvent.SELECTED));
+                }
+
+                adminSubPanel.add(rollnumberLabel);
+                adminSubPanel.add(name);
+                adminSubPanel.add(nameLabel);
+                adminSubPanel.add(father_name);
+                adminSubPanel.add(father_name_Label);
+                adminSubPanel.add(dobLabel);
+                adminSubPanel.add(dob);
+                adminSubPanel.add(address);
+                adminSubPanel.add(addressArea);
+                adminSubPanel.add(contact);
+                adminSubPanel.add(contactLabel);
+                adminSubPanel.add(email);
+                adminSubPanel.add(emailLabel);
+                adminSubPanel.add(course);
+                adminSubPanel.add(courseLabel);
+                adminSubPanel.add(branch);
+                adminSubPanel.add(branchTextArea);
+                adminPanel.revalidate();
+                adminPanel.repaint();
+            }
+        });
+
+        removeTeacher.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Teacher Delete Triggered");
+
+                adminSubPanel.removeAll();
+                adminSubPanel.add(removeStudent);
+                adminSubPanel.add(removeTeacher);
+
+                JLabel idLabel = new JLabel("Select Id ");
+                idLabel.setBounds(20, 70, 100, 16);
+                idLabel.setFont(new Font("Consolas", Font.BOLD, 16));
+
+                Choice idChoice = new Choice();
+                idChoice.setBounds(130, 65, 120, 16);
+                idChoice.add("-- Select ID --");
+
+                try {
+                    ResultSet rs = stmt.executeQuery("SELECT Teacher_ID FROM teachers ORDER BY Teacher_ID ASC;");
+                    while (rs.next()) {
+                        idChoice.add(rs.getString("Teacher_ID"));
+                    }
+                } catch (Exception p) {
+                    p.printStackTrace();
+                }
+
+                JLabel name = new JLabel("Name :");
+                name.setFont(new Font("Consolas", Font.PLAIN, 16));
+                name.setBounds(20, 120, 200, 30);
+
+                JLabel nameLabel = new JLabel();
+                nameLabel.setBounds(160, 120, 200, 30);
+                nameLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+
+                JLabel designation = new JLabel("Designation :");
+                designation.setFont(new Font("Consolas", Font.PLAIN, 16));
+                designation.setBounds(20, 150, 200, 30);
+
+                JLabel designationLabel = new JLabel();
+                designationLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                designationLabel.setBounds(160, 150, 200, 30);
+
+                JLabel dob = new JLabel("Date of Birth :");
+                dob.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dob.setBounds(20, 180, 200, 30);
+
+                JLabel dobLabel = new JLabel();
+                dobLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                dobLabel.setBounds(160, 180, 200, 30);
+
+                JLabel address = new JLabel("Address :");
+                address.setFont(new Font("Consolas", Font.PLAIN, 16));
+                address.setBounds(20, 210, 180, 25);
+
+                JTextArea addressArea = new JTextArea();
+                addressArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+                addressArea.setLineWrap(true);
+                addressArea.setWrapStyleWord(true);
+                addressArea.setOpaque(false);
+                addressArea.setBounds(110, 210, 250, 50);
+
+                JLabel contact = new JLabel("Mobile :");
+                contact.setFont(new Font("Consolas", Font.PLAIN, 16));
+                contact.setBounds(380, 120, 200, 30);
+
+                JLabel contactLabel = new JLabel();
+                contactLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                contactLabel.setBounds(460, 120, 220, 30);
+
+                JLabel email = new JLabel("Email : ");
+                email.setFont(new Font("Consolas", Font.PLAIN, 16));
+                email.setBounds(380, 150, 200, 30);
+
+                JLabel emailLabel = new JLabel();
+                emailLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                emailLabel.setBounds(460, 150, 220, 30);
+
+                JLabel course = new JLabel("Department :");
+                course.setFont(new Font("Consolas", Font.PLAIN, 16));
+                course.setBounds(380, 180, 200, 30);
+
+                JLabel courseLabel = new JLabel();
+                courseLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                courseLabel.setBounds(490, 180, 200, 30);
+
+                JLabel branch = new JLabel("Branch :");
+                branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branch.setBounds(380, 210, 200, 30);
+
+                JTextArea branchTextArea = new JTextArea();
+                branchTextArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branchTextArea.setLineWrap(true);
+                branchTextArea.setWrapStyleWord(true);
+                branchTextArea.setOpaque(false);
+                branchTextArea.setBounds(460, 215, 220, 60);
+
+                MyButtonRed deleteButton = new MyButtonRed("Delete");
+                deleteButton.setBounds(250, 300, 100, 25);
+                adminSubPanel.add(deleteButton);
+                deleteButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            int deleteConfirm = JOptionPane.showConfirmDialog(adminSubPanel, "Confirm Delete ?",
+                                    "Delete", JOptionPane.YES_NO_OPTION);
+                            if (deleteConfirm == JOptionPane.YES_OPTION) {
+                                String removeQuery = "DELETE FROM teachers WHERE Email_id = ?";
+                                PreparedStatement pstmt = con.prepareStatement(removeQuery);
+                                pstmt.setString(1, emailLabel.getText());
+                                pstmt.executeUpdate();
+                                String currentRoll = idChoice.getSelectedItem();
+                                System.out.println(currentRoll);
+                                idChoice.select(0);
+                                idChoice.remove(currentRoll);
+
+                                name.setVisible(false);
+                                nameLabel.setVisible(false);
+                                designation.setVisible(false);
+                                designationLabel.setVisible(false);
+                                dobLabel.setVisible(false);
+                                dob.setVisible(false);
+                                address.setVisible(false);
+                                addressArea.setVisible(false);
+                                contact.setVisible(false);
+                                contactLabel.setVisible(false);
+                                email.setVisible(false);
+                                emailLabel.setVisible(false);
+                                course.setVisible(false);
+                                courseLabel.setVisible(false);
+                                branch.setVisible(false);
+                                branchTextArea.setVisible(false);
+                                deleteButton.setVisible(false);
+
+                                adminSubPanel.repaint();
+                                adminSubPanel.revalidate();
+                                JOptionPane.showMessageDialog(adminSubPanel, "Profile deleted successfully!", "Success",
+                                        JOptionPane.INFORMATION_MESSAGE);
+                            } else {
+                                return;
+                            }
+                        } catch (SQLException e1) {
+                            e1.printStackTrace();
+                            JOptionPane.showMessageDialog(adminSubPanel,
+                                    "ERROR : Delete Failed\nCheck console for details", "Error",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+
+                // All Components are not visible by default
+
+                name.setVisible(false);
+                nameLabel.setVisible(false);
+                designation.setVisible(false);
+                designationLabel.setVisible(false);
+                dobLabel.setVisible(false);
+                dob.setVisible(false);
+                address.setVisible(false);
+                addressArea.setVisible(false);
+                contact.setVisible(false);
+                contactLabel.setVisible(false);
+                email.setVisible(false);
+                emailLabel.setVisible(false);
+                course.setVisible(false);
+                courseLabel.setVisible(false);
+                branch.setVisible(false);
+                branchTextArea.setVisible(false);
+                deleteButton.setVisible(false);
+
+                idChoice.addItemListener(new ItemListener() {
+                    public void itemStateChanged(ItemEvent ie) {
+                        if ((idChoice.getSelectedIndex() == 0) || (ie.getStateChange() == 0)) {
+                            // Components will be visible if ID is Selected
+                            name.setVisible(false);
+                            nameLabel.setVisible(false);
+                            designation.setVisible(false);
+                            designationLabel.setVisible(false);
+                            dobLabel.setVisible(false);
+                            dob.setVisible(false);
+                            address.setVisible(false);
+                            addressArea.setVisible(false);
+                            contact.setVisible(false);
+                            contactLabel.setVisible(false);
+                            email.setVisible(false);
+                            emailLabel.setVisible(false);
+                            course.setVisible(false);
+                            courseLabel.setVisible(false);
+                            branch.setVisible(false);
+                            branchTextArea.setVisible(false);
+                            deleteButton.setVisible(false);
+                        } else {
+                            try {
+                                name.setVisible(true);
+                                nameLabel.setVisible(true);
+                                designation.setVisible(true);
+                                designationLabel.setVisible(true);
+                                dobLabel.setVisible(true);
+                                dob.setVisible(true);
+                                address.setVisible(true);
+                                addressArea.setVisible(true);
+                                contact.setVisible(true);
+                                contactLabel.setVisible(true);
+                                email.setVisible(true);
+                                emailLabel.setVisible(true);
+                                course.setVisible(true);
+                                courseLabel.setVisible(true);
+                                branch.setVisible(true);
+                                branchTextArea.setVisible(true);
+                                deleteButton.setVisible(true);
+
+                                String query = "select * from teachers,courses where Teacher_ID='"
+                                        + idChoice.getSelectedItem() + "' and teachers.Course_ID=courses.Course_ID";
+                                ResultSet rs = stmt.executeQuery(query);
+                                rs.next();
+                                nameLabel.setText(rs.getString(2) + " " + rs.getString(3));
+                                designationLabel.setText(rs.getString(4));
+                                emailLabel.setText(rs.getString(5));
+                                dobLabel.setText(rs.getString(6));
+                                addressArea.setText(rs.getString(7));
+                                contactLabel.setText(rs.getString(8));
+                                courseLabel.setText(rs.getString(11));
+                                branchTextArea.setText(rs.getString(12));
+                            } catch (Exception c) {
+                                c.printStackTrace();
+                            }
+                        }
+                    }
+                });
+
+                idChoice.select(key);
+                for (ItemListener listener : idChoice.getItemListeners()) {
+                    listener.itemStateChanged(new ItemEvent(idChoice, ItemEvent.ITEM_STATE_CHANGED, idChoice,
+                            ItemEvent.SELECTED));
+                }
+
+                adminSubPanel.add(idLabel);
+                adminSubPanel.add(idChoice);
+                adminSubPanel.add(name);
+                adminSubPanel.add(nameLabel);
+                adminSubPanel.add(designation);
+                adminSubPanel.add(designationLabel);
+                adminSubPanel.add(dobLabel);
+                adminSubPanel.add(dob);
+                adminSubPanel.add(address);
+                adminSubPanel.add(addressArea);
+                adminSubPanel.add(contact);
+                adminSubPanel.add(contactLabel);
+                adminSubPanel.add(email);
+                adminSubPanel.add(emailLabel);
+                adminSubPanel.add(course);
+                adminSubPanel.add(courseLabel);
+                adminSubPanel.add(branch);
+                adminSubPanel.add(branchTextArea);
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
+            }
+        });
+
+        if (type.equals("student")) {
+            removeStudent.doClick();
+        } else if (type.equals("teacher")) {
+            removeTeacher.doClick();
+        }
+
+        adminPanel.add(adminSubPanel);
+        adminSubPanel.setVisible(true);
+        adminPanel.revalidate();
+        adminPanel.repaint();
     }
 
     // LOGOUT Button Method
