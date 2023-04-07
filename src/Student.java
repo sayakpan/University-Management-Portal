@@ -2203,7 +2203,7 @@ public class Student {
                 addressArea.setLineWrap(true);
                 addressArea.setWrapStyleWord(true);
                 addressArea.setOpaque(false);
-                addressArea.setBounds(110, 210, 250, 60);
+                addressArea.setBounds(110, 215, 250, 60);
 
                 JLabel contact = new JLabel("Mobile :");
                 contact.setFont(new Font("Consolas", Font.PLAIN, 16));
@@ -2461,7 +2461,7 @@ public class Student {
                 addressArea.setLineWrap(true);
                 addressArea.setWrapStyleWord(true);
                 addressArea.setOpaque(false);
-                addressArea.setBounds(110, 210, 250, 50);
+                addressArea.setBounds(110, 215, 250, 50);
 
                 JLabel contact = new JLabel("Mobile :");
                 contact.setFont(new Font("Consolas", Font.PLAIN, 16));
