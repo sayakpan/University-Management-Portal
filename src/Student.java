@@ -2698,19 +2698,19 @@ public class Student {
     // Method to Examination Menu from Admin
 
     void examinationMenu() {
-        JRadioButton studentMarks = new JRadioButton("Student Marks System");
-        studentMarks.setBounds(20, 15, 175, 30);
-        studentMarks.setBackground(adminSubPanel.getBackground());
-
         JRadioButton displayResults = new JRadioButton("Display Student Result");
-        displayResults.setBounds(200, 15, 175, 30);
+        displayResults.setBounds(20, 15, 175, 30);
         displayResults.setBackground(adminSubPanel.getBackground());
+
+        JRadioButton studentMarks = new JRadioButton("Student Marks System");
+        studentMarks.setBounds(200, 15, 175, 30);
+        studentMarks.setBackground(adminSubPanel.getBackground());
 
         ButtonGroup RadioButtonGroup = new ButtonGroup();
         RadioButtonGroup.add(studentMarks);
         RadioButtonGroup.add(displayResults);
 
-        studentMarks.addActionListener(new ActionListener() {
+        displayResults.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Student Add Marks Triggered");
@@ -2718,17 +2718,25 @@ public class Student {
                 adminSubPanel.removeAll();
                 adminSubPanel.add(studentMarks);
                 adminSubPanel.add(displayResults);
+                adminSubPanel.repaint();
+                adminSubPanel.revalidate();
 
-                JLabel enterRolLabel = new JLabel("Enter Roll Number");
-                enterRolLabel.setBounds(20, 60, 170, 16);
-                enterRolLabel.setFont(new Font("Consolas", Font.BOLD, 14));
+                JLabel enterRolLabel = new JLabel("Enter Roll Number to see Results");
+                enterRolLabel.setBounds(215, 130, 350, 25);
+                enterRolLabel.setFont(new Font("Arial", Font.PLAIN, 18));
 
                 MyButtonGreen searchButton = new MyButtonGreen("Search");
-                searchButton.setBounds(230, 80, 70, 25);
+                searchButton.setBounds(520, 180, 90, 33);
+                searchButton.setBorder(BorderFactory.createMatteBorder(0, 0, 4, 4, new Color(222, 223, 224)));
 
                 JTextField searchBar = new JTextField();
-                searchBar.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-                searchBar.setBounds(20, 80, 200, 25);
+                searchBar.setFont(new Font("Arial", Font.PLAIN, 15));
+                searchBar.setForeground(themeColor);
+                searchBar.setCaretColor(Color.ORANGE);
+                searchBar.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 4, 4, new Color(222, 223, 224)),
+                        BorderFactory.createLineBorder(Color.BLACK)));
+                searchBar.setBounds(100, 180, 400, 35);
                 searchBar.addActionListener(new ActionListener() { // Performs Search on Clicking "Enter"
                     @Override
                     public void actionPerformed(ActionEvent e) {
@@ -2741,7 +2749,7 @@ public class Student {
                 backButton.addActionListener(new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
-                        studentMarks.doClick();
+                        displayResults.doClick();
                     }
                 });
                 backButton.setVisible(false);
@@ -2805,6 +2813,13 @@ public class Student {
                 resultScrollPane.getViewport().add(resultTable);
                 resultScrollPane.setBounds(335, 140, 350, 152);
 
+                JTextArea totalLabel = new JTextArea();
+                totalLabel.setFont(new Font("ARIAL", Font.BOLD, 14));
+                totalLabel.setBounds(375, 310, 220, 60);
+                totalLabel.setOpaque(false);
+                totalLabel.setLineWrap(true);
+                totalLabel.setWrapStyleWord(true);
+
                 nameLabel.setVisible(false);
                 rollLabel.setVisible(false);
                 courseLabel.setVisible(false);
@@ -2814,6 +2829,7 @@ public class Student {
                 semesterChoice.setVisible(false);
                 displayResultButton.setVisible(false);
                 resultScrollPane.setVisible(false);
+                totalLabel.setVisible(false);
 
                 searchButton.addActionListener(new ActionListener() {
                     @Override
@@ -2844,6 +2860,7 @@ public class Student {
                                 semesterLabel.setVisible(true);
                                 semesterChoice.setVisible(true);
                                 resultScrollPane.setVisible(false);
+                                totalLabel.setVisible(false);
 
                                 // Search the entered Roll Number
                                 int RollNo = searchResult.getInt("Roll_No");
@@ -2879,11 +2896,10 @@ public class Student {
                                         System.out.println("Selected semester: " + semesterChoice.getSelectedIndex());
                                         resultModel.setRowCount(0);
                                         // Fetch Marks
-                                        String marksQuery = "SELECT * FROM marks JOIN subjects ON marks.subject_id = subjects.id  WHERE marks.Roll_No = ? AND subjects.semester = ?;";
-                                        PreparedStatement pstmt2;
                                         try {
-                                            System.out.println(RollNo);
-                                            pstmt2 = con.prepareStatement(marksQuery);
+                                            String marksQuery = "SELECT * FROM marks JOIN subjects ON marks.subject_id = subjects.id  WHERE marks.Roll_No = ? AND subjects.semester = ?;";
+                                            PreparedStatement pstmt2 = con.prepareStatement(marksQuery);
+                                            ;
                                             pstmt2.setInt(1, RollNo);
                                             pstmt2.setInt(2, semesterChoice.getSelectedIndex());
                                             ResultSet result = pstmt2.executeQuery();
@@ -2893,10 +2909,23 @@ public class Student {
                                                         result.getString("marks"), result.getString("letter_grade") };
                                                 resultModel.addRow(row);
                                             }
+
+                                            // Find Total of each Semester
+                                            String totalQuery = "	SELECT * FROM studentdb.results_total where Roll_No = ? And semester=?;";
+                                            PreparedStatement pstmt3 = con.prepareStatement(totalQuery);
+                                            pstmt3.setInt(1, RollNo);
+                                            pstmt3.setInt(2, semesterChoice.getSelectedIndex());
+                                            ResultSet totalResult = pstmt3.executeQuery();
+                                            totalResult.next();
+                                            totalLabel
+                                                    .setText("Total Marks Obtained : " + totalResult.getString("total")
+                                                            + "\nGrade : " + totalResult.getString("letter_grade")
+                                                            + "\nSGPA : " + totalResult.getString("sgpa"));
                                         } catch (SQLException e1) {
                                             e1.printStackTrace();
                                         }
                                         resultScrollPane.setVisible(true);
+                                        totalLabel.setVisible(true);
 
                                     }
                                 });
@@ -2916,6 +2945,7 @@ public class Student {
                 adminSubPanel.add(semesterChoice);
                 adminSubPanel.add(displayResultButton);
                 adminSubPanel.add(resultScrollPane);
+                adminSubPanel.add(totalLabel);
 
                 adminSubPanel.add(enterRolLabel);
                 adminSubPanel.add(searchBar);
@@ -2927,7 +2957,7 @@ public class Student {
             }
         });
 
-        displayResults.addActionListener(new ActionListener() {
+        studentMarks.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("Student Display Marks Triggered");
@@ -2935,6 +2965,8 @@ public class Student {
                 adminSubPanel.removeAll();
                 adminSubPanel.add(studentMarks);
                 adminSubPanel.add(displayResults);
+                adminSubPanel.repaint();
+                adminSubPanel.revalidate();
 
             }
         });
