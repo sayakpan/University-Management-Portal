@@ -18,6 +18,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -40,6 +42,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+
+import com.mysql.cj.jdbc.result.ResultSetMetaData;
 
 public class Student {
     Connection con;
@@ -2671,29 +2675,30 @@ public class Student {
         adminPanel.revalidate();
         adminPanel.repaint();
     }
-// method for fees structure
 
-    void feeStructure(){
+    // method for fees structure
+     void feeStructure(){
+
         adminSubPanel.removeAll();
         JLabel course = new JLabel("Course :");
        course.setFont(new Font("Consolas", Font.BOLD, 18));
-       course.setBounds(20, 30, 100, 30);
+       course.setBounds(20, 50, 100, 30);
        adminSubPanel.add(course);
 
         JLabel branch = new JLabel("Branch :");
         branch.setFont(new Font("Consolas", Font.BOLD, 18));
-        branch.setBounds(350, 30, 100, 30);
+        branch.setBounds(360, 50, 100, 30);
 
         String[] branchList = { "-- Select Branch --", "Mechanical Engineering",
         "Electronics and Communication Engineering", "Electrical Engineering",
         "Computer Science Engineering", "Civil Engineering"};
 
         JComboBox<String> branchComboBox = new JComboBox<String>(branchList);
-        branchComboBox.setBounds(470, 30, 200, 20);
+        branchComboBox.setBounds(470, 50, 200, 25);
 
         String[] courseList = { "-- Select Course --","BCA", "MCA", "BTECH", "BBA", "MBA" };
         JComboBox<String> courseComboBox = new JComboBox<String>(courseList);
-        courseComboBox.setBounds(140, 30, 180, 20);
+        courseComboBox.setBounds(140, 50, 200, 25);
         adminSubPanel.add(courseComboBox);
 
         courseComboBox.addActionListener(new ActionListener() {
@@ -2710,71 +2715,77 @@ public class Student {
                 adminPanel.repaint();
             }
         });
-      String selectedCourse = (String) courseComboBox.getSelectedItem();
-String selectedBranch = (String) branchComboBox.getSelectedItem();
 
-// if (selectedCourse.equals("-- Select Course --") || (selectedCourse.equals("BTECH") && selectedBranch.equals("-- Select Branch --"))) {
-//     // If the user hasn't selected a course or a branch (for BTECH), do nothing
-//     return;
-// }else{
-    DefaultTableModel model = new DefaultTableModel() {
-        public boolean isCellEditable(int row, int column) { 
-            return false;
-        };
-    }; 
-    model.addColumn("semester1");
-    model.addColumn("semester2");
-    model.addColumn("semester 3");
-    model.addColumn("semester4");
-    model.addColumn("semester 5");
-    model.addColumn("semester 6");
-    model.addColumn("semester 7");
-    model.addColumn("semester 8");
-    try{
-    
-        String Query = "Select * from fees,courses where fees.Course_ID=courses.Course_ID LIMIT 0,20;";
-        ResultSet searchResult = stmt.executeQuery(Query);
-       
-        while (searchResult.next()) {
-            model.addRow(new String[] {
-                    searchResult.getString("semester1"),
-                    searchResult.getString("semester2") ,
-                    searchResult.getString("semester3"),
-                    searchResult.getString("semester4"),
-                    searchResult.getString("semester5"),
-                    searchResult.getString("semester6"),
-                    searchResult.getString("semester7"),
-                    searchResult.getString("semester8")
-            });
+// create a table to display the results
+JTable resultTable = new JTable();
+Color ivory=new Color(255,255,208);
+resultTable.setOpaque(false);
+resultTable.setBackground(ivory);
+resultTable.setRowHeight(30);
+resultTable.setFont(new Font("Arial", Font.BOLD, 12));
 
-        adminPanel.revalidate();
-        adminPanel.repaint();
+// create a scroll pane to hold the table
+JScrollPane scrollPane = new JScrollPane(resultTable);
+scrollPane.setBounds(10, 160, 660, 210);
+adminSubPanel.add(scrollPane);
+
+// add a button to  query
+MyButtonGreen searchButton = new MyButtonGreen("Search");
+searchButton.setBounds(600, 10, 90, 25);
+adminSubPanel.add(searchButton);
+searchButton.addActionListener(new ActionListener() { 
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        // get the selected course and branch
+        String selectedCourse = (String) courseComboBox.getSelectedItem();
+        String selectedBranch = (String) branchComboBox.getSelectedItem();
+        String query = "SELECT * FROM fees ,courses WHERE Course_Name='" + selectedCourse + "'and courses.Course_ID=fees.Course_ID";
+        if (selectedCourse.equals("BTECH")) {
+            query += " AND Branch='" + selectedBranch + "'";
         }
-    }catch(Exception e){
-        e.printStackTrace();
+        try {              
+            ResultSet resultSet = stmt.executeQuery(query);
+
+            // create a table model to hold the results
+            DefaultTableModel tableModel = new DefaultTableModel(){          
+                    public boolean isCellEditable(int row, int column) { 
+                        return false;
+            };
+        };
+
+            tableModel.addColumn("Semester 1");
+            tableModel.addColumn("Semester 2");
+            tableModel.addColumn("Semester 3");
+            tableModel.addColumn("semester 4");
+            tableModel.addColumn("Semester 5");
+            tableModel.addColumn("Semester 6");
+            tableModel.addColumn("Semester 7");
+            tableModel.addColumn("semester 8");
+
+            // populate the table model with the results
+            while (resultSet.next()) {
+                String Semester1 = resultSet.getString("semester1");
+                String Semester2 = resultSet.getString("semester2");
+                String Semester3 = resultSet.getString("semester3");
+                String Semester4 = resultSet.getString("semester4");
+                String Semester5 = resultSet.getString("semester5");
+                String Semester6 = resultSet.getString("semester6");
+                String Semester7 = resultSet.getString("semester7");
+                String Semester8 = resultSet.getString("semester8");
+
+                Object[] row = { Semester1, Semester2, Semester3, Semester4, Semester5, Semester6, Semester7, Semester8 };
+                tableModel.addRow(row);
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();         
+            }      
+            // set the table model to the result table
+            resultTable.setModel(tableModel);
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
     }
-    JTable resultTable = new JTable(model);
-    resultTable.setRowHeight(22);
-
-    TableColumnModel columnModel = resultTable.getColumnModel();
-    columnModel.getColumn(0).setPreferredWidth(80);
-    columnModel.getColumn(1).setPreferredWidth(80);
-    columnModel.getColumn(2).setPreferredWidth(80);
-    columnModel.getColumn(3).setPreferredWidth(80);
-    columnModel.getColumn(4).setPreferredWidth(80);
-    columnModel.getColumn(5).setPreferredWidth(80);
-
-    JScrollPane tableScrollPane = new JScrollPane(resultTable);
-    tableScrollPane.getViewport().add(resultTable);
-    tableScrollPane.setBounds(20, 90, 660, 220);
-
-    adminSubPanel.revalidate();
-    adminSubPanel.repaint();
-    adminSubPanel.add(tableScrollPane);
-
-
-        adminPanel.add(adminSubPanel);
-        
+});
+       adminPanel.add(adminSubPanel);       
         adminSubPanel.setVisible(true);
         adminPanel.revalidate();
         adminPanel.repaint();
