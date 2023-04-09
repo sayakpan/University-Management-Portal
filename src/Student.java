@@ -2726,7 +2726,7 @@ resultTable.setFont(new Font("Arial", Font.BOLD, 12));
 
 // create a scroll pane to hold the table
 JScrollPane scrollPane = new JScrollPane(resultTable);
-scrollPane.setBounds(10, 160, 660, 210);
+scrollPane.setBounds(10, 130, 650, 250);
 adminSubPanel.add(scrollPane);
 
 // add a button to  query
@@ -2752,16 +2752,9 @@ searchButton.addActionListener(new ActionListener() {
                         return false;
             };
         };
-
-            tableModel.addColumn("Semester 1");
-            tableModel.addColumn("Semester 2");
-            tableModel.addColumn("Semester 3");
-            tableModel.addColumn("semester 4");
-            tableModel.addColumn("Semester 5");
-            tableModel.addColumn("Semester 6");
-            tableModel.addColumn("Semester 7");
-            tableModel.addColumn("semester 8");
-
+        tableModel.addColumn("Semester");
+        tableModel.addColumn("Fees");
+        
             // populate the table model with the results
             while (resultSet.next()) {
                 String Semester1 = resultSet.getString("semester1");
@@ -2772,9 +2765,16 @@ searchButton.addActionListener(new ActionListener() {
                 String Semester6 = resultSet.getString("semester6");
                 String Semester7 = resultSet.getString("semester7");
                 String Semester8 = resultSet.getString("semester8");
+                
+        tableModel.addRow(new Object[]{"Semester 1", Semester1});
+        tableModel.addRow(new Object[]{"Semester 2", Semester2});
+        tableModel.addRow(new Object[]{"Semester 3", Semester3});
+        tableModel.addRow(new Object[]{"Semester 4", Semester4});
+        tableModel.addRow(new Object[]{"Semester 5", Semester5});
+        tableModel.addRow(new Object[]{"Semester 6", Semester6});
+        tableModel.addRow(new Object[]{"Semester 7", Semester7});
+        tableModel.addRow(new Object[]{"Semester 8", Semester8});
 
-                Object[] row = { Semester1, Semester2, Semester3, Semester4, Semester5, Semester6, Semester7, Semester8 };
-                tableModel.addRow(row);
                 adminSubPanel.revalidate();
                 adminSubPanel.repaint();         
             }      
