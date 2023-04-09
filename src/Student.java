@@ -191,6 +191,29 @@ public class Student {
 
     }
 
+    class MyButtonHoverBlue extends MyButtonBlue {
+        MyButtonHoverBlue(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(themeColor);
+            setBorder(BorderFactory.createLineBorder(themeColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(themeColor);
+            setForeground(Color.WHITE);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(themeColor);
+        }
+
+    }
+
     class JMenuItemTheme extends JMenuItem implements MouseListener {
         JMenuItemTheme(String text) {
             super(text);
@@ -856,7 +879,7 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 adminSubPanel.removeAll();
-                adminSubPanel.repaint();
+                examinationMenu();
             }
         });
 
@@ -2668,6 +2691,258 @@ public class Student {
 
         adminPanel.add(adminSubPanel);
         adminSubPanel.setVisible(true);
+        adminPanel.revalidate();
+        adminPanel.repaint();
+    }
+
+    // Method to Examination Menu from Admin
+
+    void examinationMenu() {
+        JRadioButton studentMarks = new JRadioButton("Student Marks System");
+        studentMarks.setBounds(20, 15, 175, 30);
+        studentMarks.setBackground(adminSubPanel.getBackground());
+
+        JRadioButton displayResults = new JRadioButton("Display Student Result");
+        displayResults.setBounds(200, 15, 175, 30);
+        displayResults.setBackground(adminSubPanel.getBackground());
+
+        ButtonGroup RadioButtonGroup = new ButtonGroup();
+        RadioButtonGroup.add(studentMarks);
+        RadioButtonGroup.add(displayResults);
+
+        studentMarks.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Student Add Marks Triggered");
+
+                adminSubPanel.removeAll();
+                adminSubPanel.add(studentMarks);
+                adminSubPanel.add(displayResults);
+
+                JLabel enterRolLabel = new JLabel("Enter Roll Number");
+                enterRolLabel.setBounds(20, 60, 170, 16);
+                enterRolLabel.setFont(new Font("Consolas", Font.BOLD, 14));
+
+                MyButtonGreen searchButton = new MyButtonGreen("Search");
+                searchButton.setBounds(230, 80, 70, 25);
+
+                JTextField searchBar = new JTextField();
+                searchBar.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+                searchBar.setBounds(20, 80, 200, 25);
+                searchBar.addActionListener(new ActionListener() { // Performs Search on Clicking "Enter"
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        searchButton.doClick();
+                    }
+                });
+
+                MyButtonYellow backButton = new MyButtonYellow("Back");
+                backButton.setBounds(20, 80, 70, 25);
+                backButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        studentMarks.doClick();
+                    }
+                });
+                backButton.setVisible(false);
+
+                JLabel nameLabel = new JLabel("Student Name :");
+                nameLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                nameLabel.setBounds(20, 140, 300, 20);
+
+                JLabel rollLabel = new JLabel("Roll Number :");
+                rollLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                rollLabel.setBounds(20, 160, 300, 20);
+
+                JLabel courseLabel = new JLabel("Course :");
+                courseLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                courseLabel.setBounds(20, 180, 300, 20);
+
+                JLabel branchLabel = new JLabel("Branch :");
+                branchLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branchLabel.setBounds(20, 190, 80, 40);
+
+                JTextArea branchTextArea = new JTextArea();
+                branchTextArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branchTextArea.setOpaque(false);
+                branchTextArea.setLineWrap(true);
+                branchTextArea.setWrapStyleWord(true);
+                branchTextArea.setBounds(100, 200, 200, 50);
+
+                JLabel semesterLabel = new JLabel("Select Semester :");
+                semesterLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                semesterLabel.setBounds(20, 270, 150, 20);
+
+                Choice semesterChoice = new Choice();
+                semesterChoice.setBounds(180, 270, 130, 16);
+                semesterChoice.add("-- Select Semester --");
+
+                MyButtonHoverBlue displayResultButton = new MyButtonHoverBlue("Display Result");
+                displayResultButton.setBounds(180, 310, 130, 25);
+
+                DefaultTableModel resultModel = new DefaultTableModel() {
+                    public boolean isCellEditable(int row, int column) { // To Restrict Cell Editability
+                        return false;
+                    };
+                };
+
+                resultModel.addColumn("Subject Name");
+                resultModel.addColumn("Score");
+                resultModel.addColumn("Grade");
+
+                JTable resultTable = new JTable(resultModel);
+                resultTable.setRowHeight(32);
+                resultTable.setBackground(new Color(232, 246, 255));
+                resultTable.setForeground(Color.BLACK);
+                resultTable.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+                TableColumnModel columnModel = resultTable.getColumnModel();
+                columnModel.getColumn(0).setPreferredWidth(200);
+                columnModel.getColumn(1).setPreferredWidth(70);
+                columnModel.getColumn(2).setPreferredWidth(70);
+
+                JScrollPane resultScrollPane = new JScrollPane(resultTable);
+                resultScrollPane.getViewport().add(resultTable);
+                resultScrollPane.setBounds(335, 140, 350, 152);
+
+                nameLabel.setVisible(false);
+                rollLabel.setVisible(false);
+                courseLabel.setVisible(false);
+                branchLabel.setVisible(false);
+                branchTextArea.setVisible(false);
+                semesterLabel.setVisible(false);
+                semesterChoice.setVisible(false);
+                displayResultButton.setVisible(false);
+                resultScrollPane.setVisible(false);
+
+                searchButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            String searchKey = searchBar.getText();
+                            String searchQuery = "Select * from students,courses where students.Course_ID=courses.Course_ID and Roll_No = ?";
+                            PreparedStatement pstmt = con.prepareStatement(searchQuery);
+                            pstmt.setString(1, searchKey);
+                            ResultSet searchResult = pstmt.executeQuery();
+                            if (!searchResult.isBeforeFirst()) {
+                                JOptionPane.showMessageDialog(adminSubPanel,
+                                        "No results found. Check the Roll Number and try again", "No Results",
+                                        JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                searchResult.next();
+
+                                searchBar.setVisible(false);
+                                searchButton.setVisible(false);
+                                enterRolLabel.setVisible(false);
+                                backButton.setVisible(true);
+
+                                nameLabel.setVisible(true);
+                                rollLabel.setVisible(true);
+                                courseLabel.setVisible(true);
+                                branchLabel.setVisible(true);
+                                branchTextArea.setVisible(true);
+                                semesterLabel.setVisible(true);
+                                semesterChoice.setVisible(true);
+                                resultScrollPane.setVisible(false);
+
+                                // Search the entered Roll Number
+                                int RollNo = searchResult.getInt("Roll_No");
+                                nameLabel.setText("Student Name : " + searchResult.getString("First_name") + " "
+                                        + searchResult.getString("Last_name"));
+                                rollLabel.setText("Roll Number : " + RollNo);
+                                courseLabel.setText("Course : " + searchResult.getString("Course_Name"));
+                                branchTextArea.setText(searchResult.getString("Branch"));
+
+                                // Fetch Number of Sem in Checkbox
+                                semesterChoice.removeAll();
+                                semesterChoice.add("-- Select Semester --");
+                                for (int i = 1; i <= searchResult.getInt("No_of_Semesters"); i++) {
+                                    semesterChoice.add("Semester " + i);
+                                }
+
+                                semesterChoice.addItemListener(new ItemListener() {
+                                    public void itemStateChanged(ItemEvent e) {
+                                        if ((semesterChoice.getSelectedIndex() == 0) || (e.getStateChange() == 0)) {
+                                            displayResultButton.setVisible(false);
+                                            adminSubPanel.repaint();
+                                            adminSubPanel.revalidate();
+                                        } else {
+                                            displayResultButton.setVisible(true);
+                                        }
+                                    }
+                                });
+
+                                // Display new Action Listener
+                                displayResultButton.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        System.out.println("Selected semester: " + semesterChoice.getSelectedIndex());
+                                        resultModel.setRowCount(0);
+                                        // Fetch Marks
+                                        String marksQuery = "SELECT * FROM marks JOIN subjects ON marks.subject_id = subjects.id  WHERE marks.Roll_No = ? AND subjects.semester = ?;";
+                                        PreparedStatement pstmt2;
+                                        try {
+                                            System.out.println(RollNo);
+                                            pstmt2 = con.prepareStatement(marksQuery);
+                                            pstmt2.setInt(1, RollNo);
+                                            pstmt2.setInt(2, semesterChoice.getSelectedIndex());
+                                            ResultSet result = pstmt2.executeQuery();
+
+                                            while (result.next()) {
+                                                String[] row = { result.getString("subjectName"),
+                                                        result.getString("marks"), result.getString("letter_grade") };
+                                                resultModel.addRow(row);
+                                            }
+                                        } catch (SQLException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                        resultScrollPane.setVisible(true);
+
+                                    }
+                                });
+                            }
+                        } catch (SQLException e1) {
+                            e1.getStackTrace();
+                        }
+                    }
+                });
+
+                adminSubPanel.add(nameLabel);
+                adminSubPanel.add(rollLabel);
+                adminSubPanel.add(courseLabel);
+                adminSubPanel.add(branchLabel);
+                adminSubPanel.add(branchTextArea);
+                adminSubPanel.add(semesterLabel);
+                adminSubPanel.add(semesterChoice);
+                adminSubPanel.add(displayResultButton);
+                adminSubPanel.add(resultScrollPane);
+
+                adminSubPanel.add(enterRolLabel);
+                adminSubPanel.add(searchBar);
+                adminSubPanel.add(searchButton);
+                adminSubPanel.add(backButton);
+
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
+            }
+        });
+
+        displayResults.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Student Display Marks Triggered");
+
+                adminSubPanel.removeAll();
+                adminSubPanel.add(studentMarks);
+                adminSubPanel.add(displayResults);
+
+            }
+        });
+
+        adminSubPanel.add(studentMarks);
+        adminSubPanel.add(displayResults);
+
+        adminPanel.add(adminSubPanel);
         adminPanel.revalidate();
         adminPanel.repaint();
     }
