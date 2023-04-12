@@ -871,7 +871,7 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 adminSubPanel.removeAll();
-                adminSubPanel.repaint();
+                feeStructure();
             }
         });
 
@@ -2975,6 +2975,106 @@ public class Student {
         adminSubPanel.add(displayResults);
 
         adminPanel.add(adminSubPanel);
+        adminPanel.revalidate();
+        adminPanel.repaint();
+    }
+
+    // Method for fees structure
+
+    void feeStructure() {
+        adminSubPanel.repaint();
+        adminSubPanel.revalidate();
+
+        JLabel course = new JLabel("Course :");
+        course.setFont(new Font("Consolas", Font.PLAIN, 16));
+        course.setBounds(20, 25, 70, 30);
+        adminSubPanel.add(course);
+
+        String[] courseList = { "-- Select Course --", "BCA", "MCA", "BTECH", "BBA", "MBA" };
+        JComboBox<String> courseComboBox = new JComboBox<String>(courseList);
+        courseComboBox.setBounds(100, 25, 140, 25);
+        adminSubPanel.add(courseComboBox);
+
+        JLabel branch = new JLabel("Branch :");
+        branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+        branch.setBounds(20, 60, 70, 30);
+
+        String[] branchList = { "-- Select Branch --", "Mechanical Engineering",
+                "Electronics and Communication Engineering", "Electrical Engineering",
+                "Computer Science Engineering", "Civil Engineering" };
+        JComboBox<String> branchComboBox = new JComboBox<String>(branchList);
+        branchComboBox.setBounds(100, 60, 240, 25);
+
+        DefaultTableModel feesTableModel = new DefaultTableModel() {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            };
+        };
+        feesTableModel.addColumn("Semester");
+        feesTableModel.addColumn("Fees (in Rs.)");
+
+        JTable feesTable = new JTable(feesTableModel);
+        feesTable.setRowHeight(30);
+        feesTable.setFont(new Font("Arial", Font.BOLD, 12));
+
+        JScrollPane scrollPane = new JScrollPane(feesTable);
+        scrollPane.setBounds(20, 110, 350, 265);
+        adminSubPanel.add(scrollPane);
+        scrollPane.setVisible(false);
+
+        courseComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (courseComboBox.getSelectedItem().equals("BTECH")) {
+                    adminSubPanel.add(branch);
+                    adminSubPanel.add(branchComboBox);
+                } else {
+                    adminSubPanel.remove(branch);
+                    adminSubPanel.remove(branchComboBox);
+                }
+                adminPanel.revalidate();
+                adminPanel.repaint();
+            }
+        });
+
+        // add a button to query
+        MyButtonGreen searchButton = new MyButtonGreen("Search");
+        searchButton.setBounds(580, 25, 90, 25);
+        adminSubPanel.add(searchButton);
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // get the selected course and branch
+                String selectedCourse = (String) courseComboBox.getSelectedItem();
+                String selectedBranch = (String) branchComboBox.getSelectedItem();
+                String query = "SELECT * FROM fees ,courses WHERE Course_Name='" + selectedCourse
+                        + "'and courses.Course_ID=fees.Course_ID";
+                if (selectedCourse.equals("BTECH")) {
+                    query += " AND Branch='" + selectedBranch + "'";
+                }
+                try {
+                    scrollPane.setVisible(true);
+                    feesTableModel.setRowCount(0);
+                    ResultSet result = stmt.executeQuery(query);
+
+                    // populate the table model with the results
+                    while (result.next()) {
+                        int NumOfSemester = result.getInt("No_of_Semesters");
+
+                        for (int i = 1; i <= NumOfSemester; i++) {
+                            String[] row = { "Semester " + i, result.getString(i + 1) };
+                            feesTableModel.addRow(row);
+                        }
+                    }
+                    adminSubPanel.revalidate();
+                    adminSubPanel.repaint();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        adminPanel.add(adminSubPanel);
+        adminSubPanel.setVisible(true);
         adminPanel.revalidate();
         adminPanel.repaint();
     }
