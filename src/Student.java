@@ -214,6 +214,27 @@ public class Student {
 
     }
 
+    class DashboardCountButton extends MyButtonBlue {
+        DashboardCountButton(int count, String label, Color buttonColor) {
+            super("<html><div style='text-align: right;'><font size='6'><b>" + count + "</b></font><br><font size='3'>"
+                    + label + "</font></div></html>");
+            setOpaque(true);
+            setBackground(buttonColor);
+            setForeground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(buttonColor));
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(getBackground().darker());
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(getBackground().brighter());
+        }
+    }
+
     class JMenuItemTheme extends JMenuItem implements MouseListener {
         JMenuItemTheme(String text) {
             super(text);
@@ -349,6 +370,19 @@ public class Student {
                     e1.printStackTrace();
                 }
 
+            }
+        });
+
+        userField.addActionListener(new ActionListener() { // Press Enter to Login
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginButton.doClick();
+            }
+        });
+        passField.addActionListener(new ActionListener() { // Press Enter to Login
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginButton.doClick();
             }
         });
 
@@ -834,6 +868,13 @@ public class Student {
         adminSubPanel.setLayout(null);
 
         // Action Listeners
+        dashboardMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
+                dashboard();
+            }
+        });
 
         addMenu.addActionListener(new ActionListener() {
             @Override
@@ -887,8 +928,48 @@ public class Student {
         frame.add(adminPanel);
         adminPanel.add(h1);
         logoutBtn(adminPanel);
+        dashboardMenu.doClick();
 
         frame.setVisible(true);
+    }
+
+    // Method for Dashboard of Admin
+    void dashboard() {
+        String studentQuery = "SELECT count(*) from students";
+        String teachersQuery = "SELECT count(*) from teachers";
+        String courseQuery = "SELECT count(*) from courses";
+        try {
+            ResultSet studentCount = stmt.executeQuery(studentQuery);
+            studentCount.next();
+            DashboardCountButton studentBoxButton = new DashboardCountButton(studentCount.getInt(1), "STUDENT",
+                    new Color(8, 100, 252));
+            studentBoxButton.setBounds(20, 20, 150, 70);
+            adminSubPanel.add(studentBoxButton);
+
+            ResultSet teacherCount = stmt.executeQuery(teachersQuery);
+            teacherCount.next();
+            DashboardCountButton teacherBoxButton = new DashboardCountButton(teacherCount.getInt(1), "TEACHERS",
+                    new Color(44, 196, 128));
+            teacherBoxButton.setBounds(190, 20, 150, 70);
+            adminSubPanel.add(teacherBoxButton);
+
+            ResultSet courserCount = stmt.executeQuery(courseQuery);
+            courserCount.next();
+            DashboardCountButton courseBoxButton = new DashboardCountButton(courserCount.getInt(1), "COURSES",
+                    new Color(244, 153, 14));
+            courseBoxButton.setBounds(360, 20, 150, 70);
+            adminSubPanel.add(courseBoxButton);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        DashboardCountButton examBoxButton = new DashboardCountButton(2, "EXAMS", new Color(250, 100, 105));
+        examBoxButton.setBounds(530, 20, 150, 70);
+
+        adminSubPanel.add(examBoxButton);
+        adminPanel.add(adminSubPanel);
+        adminPanel.revalidate();
+        adminPanel.repaint();
     }
 
     // Method to Add Profiles from Admin
