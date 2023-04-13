@@ -239,7 +239,7 @@ public class Student {
         JMenuItemTheme(String text) {
             super(text);
             setOpaque(true);
-            setBorder(BorderFactory.createEmptyBorder(5, 16, 5, 10));
+            setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 10));
             setBackground(themeColor);
             setForeground(Color.WHITE);
             setHorizontalAlignment(CENTER);
@@ -534,42 +534,59 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String updateQuery = "UPDATE students SET Fathers_name='" + fatherNameField.getText() +
-                            "',Address='" + addressField.getText() + "',Contact_no='" + contactField.getText()
-                            + "' where Email_id='" + email + "';";
-                    stmt.executeUpdate(updateQuery);
+                    // Check for existing Pending Requests
+                    String checkExistingPendingQuery = "SELECT * FROM change_requests Where user_id='" + email
+                            + "' AND status='pending';";
+                    ResultSet pendingModification = stmt.executeQuery(checkExistingPendingQuery);
+                    if (pendingModification.next()) {
+                        JOptionPane.showMessageDialog(studentPanel,
+                                "You already have a pending correction request.\nContact Admin for Approval",
+                                "Request Already Exists", JOptionPane.WARNING_MESSAGE);
+                        cancelButton.doClick();
+                    } else {
+                        String updateRequestQuery = "INSERT INTO change_requests (user_type, user_id, changable_field_1, changable_field_2, changable_field_3, status) VALUES ('student', ?, ?, ?, ?, 'pending');";
+                        PreparedStatement pstmt = con.prepareStatement(updateRequestQuery);
+                        pstmt.setString(1, email);
+                        pstmt.setString(2, fatherNameField.getText());
+                        pstmt.setString(3, addressField.getText());
+                        pstmt.setString(4, contactField.getText());
 
-                    // Replace the text fields with new labels showing the modified fields
+                        pstmt.executeUpdate();
 
-                    father_name.setBounds(50, 180, 400, 30);
-                    father_name.setText("Father's Name : " + fatherNameField.getText());
-                    studentPanel.remove(fatherNameField);
-                    studentPanel.add(father_name);
+                        JOptionPane.showMessageDialog(studentPanel,
+                                "Your details modification request is sent to Admin.\nContact Admin for Approval",
+                                "Request Sent", JOptionPane.INFORMATION_MESSAGE);
+                        // Replace the text fields with new labels showing the modified fields
 
-                    address.setBounds(50, 240, 600, 30);
-                    address.setText("Address : " + addressField.getText());
-                    studentPanel.remove(addressField);
-                    studentPanel.add(address);
+                        father_name.setBounds(50, 180, 400, 30);
+                        father_name.setText("Father's Name : " + fatherNameField.getText());
+                        studentPanel.remove(fatherNameField);
+                        studentPanel.add(father_name);
 
-                    contact.setBounds(550, 120, 300, 30);
-                    contact.setText("Mobile : " + contactField.getText());
-                    studentPanel.remove(contactField);
-                    studentPanel.add(contact);
+                        address.setBounds(50, 240, 600, 30);
+                        address.setText("Address : " + addressField.getText());
+                        studentPanel.remove(addressField);
+                        studentPanel.add(address);
 
-                    fatherNameField.setVisible(false);
-                    addressField.setVisible(false);
-                    contactField.setVisible(false);
+                        contact.setBounds(550, 120, 300, 30);
+                        contact.setText("Mobile : " + contactField.getText());
+                        studentPanel.remove(contactField);
+                        studentPanel.add(contact);
 
-                    studentPanel.add(modifyButton);
-                    modifyButton.setVisible(true);
+                        fatherNameField.setVisible(false);
+                        addressField.setVisible(false);
+                        contactField.setVisible(false);
 
-                    studentPanel.remove(saveButton);
-                    studentPanel.remove(cancelButton);
+                        studentPanel.add(modifyButton);
+                        modifyButton.setVisible(true);
 
-                    // Refresh the panel to update its layout
-                    studentPanel.revalidate();
-                    studentPanel.repaint();
+                        studentPanel.remove(saveButton);
+                        studentPanel.remove(cancelButton);
 
+                        // Refresh the panel to update its layout
+                        studentPanel.revalidate();
+                        studentPanel.repaint();
+                    }
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -741,42 +758,56 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String updateQuery = "UPDATE teachers SET Designation='" + designationField.getText() +
-                            "',Address='" + addressField.getText() + "',Contact_no='" + contactField.getText()
-                            + "' where Email_id='" + email + "';";
-                    stmt.executeUpdate(updateQuery);
+                    // Check for existing Pending Requests
+                    String checkExistingPendingQuery = "SELECT * FROM change_requests Where user_id='" + email
+                            + "' AND status='pending';";
+                    ResultSet pendingModification = stmt.executeQuery(checkExistingPendingQuery);
+                    if (pendingModification.next()) {
+                        JOptionPane.showMessageDialog(studentPanel,
+                                "You already have a pending correction request.\nContact Admin for Approval",
+                                "Request Already Exists", JOptionPane.WARNING_MESSAGE);
+                        cancelButton.doClick();
+                    } else {
+                        String updateRequestQuery = "INSERT INTO change_requests (user_type, user_id, changable_field_1, changable_field_2, changable_field_3, status) VALUES ('teacher', ?, ?, ?, ?, 'pending');";
+                        PreparedStatement pstmt = con.prepareStatement(updateRequestQuery);
+                        pstmt.setString(1, email);
+                        pstmt.setString(2, designationField.getText());
+                        pstmt.setString(3, addressField.getText());
+                        pstmt.setString(4, contactField.getText());
 
-                    // Replace the text fields with new labels showing the modified fields
+                        pstmt.executeUpdate();
 
-                    designation.setBounds(50, 180, 400, 30);
-                    designation.setText("Designation : " + designationField.getText());
-                    teacherPanel.remove(designationField);
-                    teacherPanel.add(designation);
+                        // Replace the text fields with new labels showing the modified fields
 
-                    address.setBounds(50, 240, 600, 30);
-                    address.setText("Address : " + addressField.getText());
-                    teacherPanel.remove(addressField);
-                    teacherPanel.add(address);
+                        designation.setBounds(50, 180, 400, 30);
+                        designation.setText("Designation : " + designationField.getText());
+                        teacherPanel.remove(designationField);
+                        teacherPanel.add(designation);
 
-                    contact.setBounds(550, 120, 300, 30);
-                    contact.setText("Mobile : " + contactField.getText());
-                    teacherPanel.remove(contactField);
-                    teacherPanel.add(contact);
+                        address.setBounds(50, 240, 600, 30);
+                        address.setText("Address : " + addressField.getText());
+                        teacherPanel.remove(addressField);
+                        teacherPanel.add(address);
 
-                    designationField.setVisible(false);
-                    addressField.setVisible(false);
-                    contactField.setVisible(false);
+                        contact.setBounds(550, 120, 300, 30);
+                        contact.setText("Mobile : " + contactField.getText());
+                        teacherPanel.remove(contactField);
+                        teacherPanel.add(contact);
 
-                    teacherPanel.add(modifyButton2);
-                    modifyButton2.setVisible(true);
+                        designationField.setVisible(false);
+                        addressField.setVisible(false);
+                        contactField.setVisible(false);
 
-                    teacherPanel.remove(saveButton);
-                    teacherPanel.remove(cancelButton);
+                        teacherPanel.add(modifyButton2);
+                        modifyButton2.setVisible(true);
 
-                    // Refresh the panel to update its layout
-                    teacherPanel.revalidate();
-                    teacherPanel.repaint();
+                        teacherPanel.remove(saveButton);
+                        teacherPanel.remove(cancelButton);
 
+                        // Refresh the panel to update its layout
+                        teacherPanel.revalidate();
+                        teacherPanel.repaint();
+                    }
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -851,7 +882,7 @@ public class Student {
         JMenuItemTheme searchMenu = new JMenuItemTheme("Search");
         JMenuItemTheme updateMenu = new JMenuItemTheme("Update");
         JMenuItemTheme removeMenu = new JMenuItemTheme("Remove");
-        JMenuItemTheme feeMenu = new JMenuItemTheme("Fee Details");
+        JMenuItemTheme feeMenu = new JMenuItemTheme("Courses & Fees");
         JMenuItemTheme examMenu = new JMenuItemTheme("Examination");
 
         menuBar.add(dashboardMenu);
@@ -896,7 +927,7 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 adminSubPanel.removeAll();
-                SearchExistingProfile();
+                SearchExistingProfile("default");
             }
         });
 
@@ -912,7 +943,7 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 adminSubPanel.removeAll();
-                feeStructure();
+                CourseAndFees();
             }
         });
 
@@ -935,6 +966,11 @@ public class Student {
 
     // Method for Dashboard of Admin
     void dashboard() {
+        JLabel dashLabel = new JLabel("DASHBOARD");
+        dashLabel.setBounds(20, 2, 100, 25);
+        dashLabel.setForeground(Color.LIGHT_GRAY);
+        dashLabel.setFont(new Font("Arial", Font.BOLD, 11));
+
         String studentQuery = "SELECT count(*) from students";
         String teachersQuery = "SELECT count(*) from teachers";
         String courseQuery = "SELECT count(*) from courses";
@@ -943,30 +979,75 @@ public class Student {
             studentCount.next();
             DashboardCountButton studentBoxButton = new DashboardCountButton(studentCount.getInt(1), "STUDENT",
                     new Color(8, 100, 252));
-            studentBoxButton.setBounds(20, 20, 150, 70);
+            studentBoxButton.setBounds(20, 30, 150, 70);
             adminSubPanel.add(studentBoxButton);
 
             ResultSet teacherCount = stmt.executeQuery(teachersQuery);
             teacherCount.next();
             DashboardCountButton teacherBoxButton = new DashboardCountButton(teacherCount.getInt(1), "TEACHERS",
                     new Color(44, 196, 128));
-            teacherBoxButton.setBounds(190, 20, 150, 70);
+            teacherBoxButton.setBounds(190, 30, 150, 70);
             adminSubPanel.add(teacherBoxButton);
 
             ResultSet courserCount = stmt.executeQuery(courseQuery);
             courserCount.next();
             DashboardCountButton courseBoxButton = new DashboardCountButton(courserCount.getInt(1), "COURSES",
                     new Color(244, 153, 14));
-            courseBoxButton.setBounds(360, 20, 150, 70);
+            courseBoxButton.setBounds(360, 30, 150, 70);
             adminSubPanel.add(courseBoxButton);
+
+            DashboardCountButton examBoxButton = new DashboardCountButton(2, "EXAMS", new Color(250, 100, 105));
+            examBoxButton.setBounds(530, 30, 150, 70);
+            adminSubPanel.add(examBoxButton);
+
+            studentBoxButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SearchExistingProfile("student");
+                }
+            });
+
+            teacherBoxButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SearchExistingProfile("teacher");
+                }
+            });
+
+            courseBoxButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    CourseAndFees();
+                }
+            });
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        DashboardCountButton examBoxButton = new DashboardCountButton(2, "EXAMS", new Color(250, 100, 105));
-        examBoxButton.setBounds(530, 20, 150, 70);
+        JLabel modificationRequestLabel = new JLabel("MODIFICATION REQUESTS");
+        modificationRequestLabel.setBounds(20, 120, 200, 25);
+        modificationRequestLabel.setForeground(Color.LIGHT_GRAY);
+        modificationRequestLabel.setFont(new Font("Arial", Font.BOLD, 11));
 
-        adminSubPanel.add(examBoxButton);
+        DefaultTableModel requestTableModel = new DefaultTableModel();
+        requestTableModel.addColumn("Type");
+        requestTableModel.addColumn("Name");
+        requestTableModel.addColumn("Status");
+
+        JTable requestTable = new JTable(requestTableModel);
+
+        TableColumnModel requestColumnModel = requestTable.getColumnModel();
+        requestColumnModel.getColumn(0).setPreferredWidth(70);
+        requestColumnModel.getColumn(1).setPreferredWidth(150);
+        requestColumnModel.getColumn(2).setPreferredWidth(80);
+
+        JScrollPane requestScrollPane = new JScrollPane(requestTable);
+        requestScrollPane.setBounds(20, 155, 320, 220);
+
+        adminSubPanel.add(dashLabel);
+        adminSubPanel.add(modificationRequestLabel);
+        adminSubPanel.add(requestScrollPane);
+
         adminPanel.add(adminSubPanel);
         adminPanel.revalidate();
         adminPanel.repaint();
@@ -1901,7 +1982,7 @@ public class Student {
 
     // Method to Search any Existing Profile from Admin
 
-    void SearchExistingProfile() {
+    void SearchExistingProfile(String defaultClick) {
         JRadioButton searchStudent = new JRadioButton("Search Student Profile");
         searchStudent.setBounds(20, 15, 170, 30);
         searchStudent.setBackground(adminSubPanel.getBackground());
@@ -2223,10 +2304,15 @@ public class Student {
         adminSubPanel.add(searchStudent);
         adminSubPanel.add(searchTeacher);
 
+        if (defaultClick.equals("student")) {
+            searchStudent.doClick();
+        } else if (defaultClick.equals("teacher")) {
+            searchTeacher.doClick();
+        }
+
         adminPanel.add(adminSubPanel);
         adminPanel.revalidate();
         adminPanel.repaint();
-
     }
 
     // Method to Update any Existing Profile from Admin
@@ -3062,7 +3148,7 @@ public class Student {
 
     // Method for fees structure
 
-    void feeStructure() {
+    void CourseAndFees() {
         adminSubPanel.repaint();
         adminSubPanel.revalidate();
 
