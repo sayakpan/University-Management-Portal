@@ -12,12 +12,17 @@ This management system is designed for schools and universities to manage the da
 - Modify student data: Admins can modify student data, including contact information, grades, and attendance records.
 - Modify teacher data: Admins can modify teacher data, including contact information and class schedules.
 - Admin dashboard: Admins have access to a dashboard that displays key statistics and allows for quick data modifications.
+- Modification Request: Nobody can change data without approval of admin, everyone will send request, admin will either approve or reject.
+- Marks System: Admin can set and view marks of students.
+- Fees System: Admin can view the course and fee structure.
 
 ## Technologies Used
 
 - Java: The main programming language used for this project.
+- AWT: A Java GUI toolkit used for creating the user interface.
 - Swing: A Java GUI toolkit used for creating the user interface.
 - MySQL: A relational database used for storing and retrieving data.
+- AWS: Amazon Relational Database Service is used to keep the MySQL database in the cloud.
 
 ## Getting Started
 
