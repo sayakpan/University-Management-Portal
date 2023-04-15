@@ -214,6 +214,72 @@ public class Student {
 
     }
 
+    class MyButtonHoverGreen extends MyButtonBlue {
+        MyButtonHoverGreen(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(greenColor);
+            setBorder(BorderFactory.createLineBorder(greenColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(greenColor);
+            setForeground(Color.WHITE);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(greenColor);
+        }
+    }
+
+    class MyButtonHoverRed extends MyButtonBlue {
+        MyButtonHoverRed(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(redColor);
+            setBorder(BorderFactory.createLineBorder(redColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(redColor);
+            setForeground(Color.WHITE);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(redColor);
+        }
+    }
+
+    class MyButtonHoverYellow extends MyButtonBlue {
+        MyButtonHoverYellow(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(yellowColor);
+            setBorder(BorderFactory.createLineBorder(yellowColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(yellowColor);
+            setForeground(Color.WHITE);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(yellowColor);
+        }
+    }
+
     class DashboardCountButton extends MyButtonBlue {
         DashboardCountButton(int count, String label, Color buttonColor) {
             super("<html><div style='text-align: right;'><font size='6'><b>" + count + "</b></font><br><font size='3'>"
@@ -479,6 +545,34 @@ public class Student {
                 modifyButton.setVisible(false);
                 try {
                     modifyStudent(user_email, father_name, address, contact);
+                    // Check for existing Requests
+                    String checkExistingQuery = "SELECT * FROM change_requests Where user_id='" + user_email
+                            + "' ORDER BY created_at DESC;";
+                    ResultSet existingEntry = stmt.executeQuery(checkExistingQuery);
+                    boolean isPresent = existingEntry.next();
+
+                    if (isPresent && existingEntry.getString("status").equals("pending")) {
+                        JOptionPane.showMessageDialog(studentPanel,
+                                "You already have a pending correction request.\nContact Admin for Approval.",
+                                "Request Already Exists", JOptionPane.WARNING_MESSAGE);
+                    } else if (isPresent && existingEntry.getString("status").equals("rejected")) {
+                        JOptionPane.showMessageDialog(studentPanel,
+                                "Your previous correction request was Rejected.\nMake changes carefully.",
+                                "Previous Request Rejected", JOptionPane.WARNING_MESSAGE);
+                        modifyButton.setVisible(false);
+                        modifyStudent(user_email, father_name, address, contact);
+                    } else if (isPresent && existingEntry.getString("status").equals("approved")) {
+                        int ifchange = JOptionPane.showConfirmDialog(studentPanel,
+                                "Your previous correction request was Approved.\n\nDo you want to change again ?",
+                                "Are you sure?", JOptionPane.YES_NO_OPTION);
+                        if (ifchange == JOptionPane.YES_OPTION) {
+                            modifyButton.setVisible(false);
+                            modifyStudent(user_email, father_name, address, contact);
+                        }
+                    } else {
+                        modifyButton.setVisible(false);
+                        modifyStudent(user_email, father_name, address, contact);
+                    }
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -534,59 +628,49 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    // Check for existing Pending Requests
-                    String checkExistingPendingQuery = "SELECT * FROM change_requests Where user_id='" + email
-                            + "' AND status='pending';";
-                    ResultSet pendingModification = stmt.executeQuery(checkExistingPendingQuery);
-                    if (pendingModification.next()) {
-                        JOptionPane.showMessageDialog(studentPanel,
-                                "You already have a pending correction request.\nContact Admin for Approval",
-                                "Request Already Exists", JOptionPane.WARNING_MESSAGE);
-                        cancelButton.doClick();
-                    } else {
-                        String updateRequestQuery = "INSERT INTO change_requests (user_type, user_id, changable_field_1, changable_field_2, changable_field_3, status) VALUES ('student', ?, ?, ?, ?, 'pending');";
-                        PreparedStatement pstmt = con.prepareStatement(updateRequestQuery);
-                        pstmt.setString(1, email);
-                        pstmt.setString(2, fatherNameField.getText());
-                        pstmt.setString(3, addressField.getText());
-                        pstmt.setString(4, contactField.getText());
 
-                        pstmt.executeUpdate();
+                    String updateRequestQuery = "INSERT INTO change_requests (user_type, user_id, changable_field_1, changable_field_2, changable_field_3, status) VALUES ('student', ?, ?, ?, ?, 'pending');";
+                    PreparedStatement pstmt = con.prepareStatement(updateRequestQuery);
+                    pstmt.setString(1, email);
+                    pstmt.setString(2, fatherNameField.getText());
+                    pstmt.setString(3, addressField.getText());
+                    pstmt.setString(4, contactField.getText());
 
-                        JOptionPane.showMessageDialog(studentPanel,
-                                "Your details modification request is sent to Admin.\nContact Admin for Approval",
-                                "Request Sent", JOptionPane.INFORMATION_MESSAGE);
-                        // Replace the text fields with new labels showing the modified fields
+                    pstmt.executeUpdate();
 
-                        father_name.setBounds(50, 180, 400, 30);
-                        father_name.setText("Father's Name : " + fatherNameField.getText());
-                        studentPanel.remove(fatherNameField);
-                        studentPanel.add(father_name);
+                    JOptionPane.showMessageDialog(studentPanel,
+                            "Your details modification request is sent to Admin.\nContact Admin for Approval",
+                            "Request Sent", JOptionPane.INFORMATION_MESSAGE);
+                    // Replace the text fields with new labels showing the modified fields
 
-                        address.setBounds(50, 240, 600, 30);
-                        address.setText("Address : " + addressField.getText());
-                        studentPanel.remove(addressField);
-                        studentPanel.add(address);
+                    father_name.setBounds(50, 180, 400, 30);
+                    father_name.setText("Father's Name : " + fatherNameField.getText());
+                    studentPanel.remove(fatherNameField);
+                    studentPanel.add(father_name);
 
-                        contact.setBounds(550, 120, 300, 30);
-                        contact.setText("Mobile : " + contactField.getText());
-                        studentPanel.remove(contactField);
-                        studentPanel.add(contact);
+                    address.setBounds(50, 240, 600, 30);
+                    address.setText("Address : " + addressField.getText());
+                    studentPanel.remove(addressField);
+                    studentPanel.add(address);
 
-                        fatherNameField.setVisible(false);
-                        addressField.setVisible(false);
-                        contactField.setVisible(false);
+                    contact.setBounds(550, 120, 300, 30);
+                    contact.setText("Mobile : " + contactField.getText());
+                    studentPanel.remove(contactField);
+                    studentPanel.add(contact);
 
-                        studentPanel.add(modifyButton);
-                        modifyButton.setVisible(true);
+                    fatherNameField.setVisible(false);
+                    addressField.setVisible(false);
+                    contactField.setVisible(false);
 
-                        studentPanel.remove(saveButton);
-                        studentPanel.remove(cancelButton);
+                    studentPanel.add(modifyButton);
+                    modifyButton.setVisible(true);
 
-                        // Refresh the panel to update its layout
-                        studentPanel.revalidate();
-                        studentPanel.repaint();
-                    }
+                    studentPanel.remove(saveButton);
+                    studentPanel.remove(cancelButton);
+
+                    // Refresh the panel to update its layout
+                    studentPanel.revalidate();
+                    studentPanel.repaint();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -700,9 +784,36 @@ public class Student {
         modifyButton2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                modifyButton2.setVisible(false);
+
                 try {
-                    modifyTeacher(user_email, designation, address, contact);
+                    // Check for existing Requests
+                    String checkExistingQuery = "SELECT * FROM change_requests Where user_id='" + user_email
+                            + "' ORDER BY created_at DESC;";
+                    ResultSet existingEntry = stmt.executeQuery(checkExistingQuery);
+                    boolean isPresent = existingEntry.next();
+
+                    if (isPresent && existingEntry.getString("status").equals("pending")) {
+                        JOptionPane.showMessageDialog(teacherPanel,
+                                "You already have a pending correction request.\nContact Admin for Approval.",
+                                "Request Already Exists", JOptionPane.WARNING_MESSAGE);
+                    } else if (isPresent && existingEntry.getString("status").equals("rejected")) {
+                        JOptionPane.showMessageDialog(teacherPanel,
+                                "Your previous correction request was Rejected.\nMake changes carefully.",
+                                "Previous Request Rejected", JOptionPane.WARNING_MESSAGE);
+                        modifyButton2.setVisible(false);
+                        modifyTeacher(user_email, designation, address, contact);
+                    } else if (isPresent && existingEntry.getString("status").equals("approved")) {
+                        int ifchange = JOptionPane.showConfirmDialog(teacherPanel,
+                                "Your previous correction request was Approved.\n\nDo you want to change again ?",
+                                "Are you sure?", JOptionPane.YES_NO_OPTION);
+                        if (ifchange == JOptionPane.YES_OPTION) {
+                            modifyButton2.setVisible(false);
+                            modifyTeacher(user_email, designation, address, contact);
+                        }
+                    } else {
+                        modifyButton2.setVisible(false);
+                        modifyTeacher(user_email, designation, address, contact);
+                    }
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -758,56 +869,48 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    // Check for existing Pending Requests
-                    String checkExistingPendingQuery = "SELECT * FROM change_requests Where user_id='" + email
-                            + "' AND status='pending';";
-                    ResultSet pendingModification = stmt.executeQuery(checkExistingPendingQuery);
-                    if (pendingModification.next()) {
-                        JOptionPane.showMessageDialog(studentPanel,
-                                "You already have a pending correction request.\nContact Admin for Approval",
-                                "Request Already Exists", JOptionPane.WARNING_MESSAGE);
-                        cancelButton.doClick();
-                    } else {
-                        String updateRequestQuery = "INSERT INTO change_requests (user_type, user_id, changable_field_1, changable_field_2, changable_field_3, status) VALUES ('teacher', ?, ?, ?, ?, 'pending');";
-                        PreparedStatement pstmt = con.prepareStatement(updateRequestQuery);
-                        pstmt.setString(1, email);
-                        pstmt.setString(2, designationField.getText());
-                        pstmt.setString(3, addressField.getText());
-                        pstmt.setString(4, contactField.getText());
+                    String updateRequestQuery = "INSERT INTO change_requests (user_type, user_id, changable_field_1, changable_field_2, changable_field_3, status) VALUES ('teacher', ?, ?, ?, ?, 'pending');";
+                    PreparedStatement pstmt = con.prepareStatement(updateRequestQuery);
+                    pstmt.setString(1, email);
+                    pstmt.setString(2, designationField.getText());
+                    pstmt.setString(3, addressField.getText());
+                    pstmt.setString(4, contactField.getText());
 
-                        pstmt.executeUpdate();
+                    pstmt.executeUpdate();
 
-                        // Replace the text fields with new labels showing the modified fields
+                    JOptionPane.showMessageDialog(studentPanel,
+                            "Your details modification request is sent to Admin.\nContact Admin for Approval",
+                            "Request Sent", JOptionPane.INFORMATION_MESSAGE);
+                    // Replace the text fields with new labels showing the modified fields
 
-                        designation.setBounds(50, 180, 400, 30);
-                        designation.setText("Designation : " + designationField.getText());
-                        teacherPanel.remove(designationField);
-                        teacherPanel.add(designation);
+                    designation.setBounds(50, 180, 400, 30);
+                    designation.setText("Designation : " + designationField.getText());
+                    teacherPanel.remove(designationField);
+                    teacherPanel.add(designation);
 
-                        address.setBounds(50, 240, 600, 30);
-                        address.setText("Address : " + addressField.getText());
-                        teacherPanel.remove(addressField);
-                        teacherPanel.add(address);
+                    address.setBounds(50, 240, 600, 30);
+                    address.setText("Address : " + addressField.getText());
+                    teacherPanel.remove(addressField);
+                    teacherPanel.add(address);
 
-                        contact.setBounds(550, 120, 300, 30);
-                        contact.setText("Mobile : " + contactField.getText());
-                        teacherPanel.remove(contactField);
-                        teacherPanel.add(contact);
+                    contact.setBounds(550, 120, 300, 30);
+                    contact.setText("Mobile : " + contactField.getText());
+                    teacherPanel.remove(contactField);
+                    teacherPanel.add(contact);
 
-                        designationField.setVisible(false);
-                        addressField.setVisible(false);
-                        contactField.setVisible(false);
+                    designationField.setVisible(false);
+                    addressField.setVisible(false);
+                    contactField.setVisible(false);
 
-                        teacherPanel.add(modifyButton2);
-                        modifyButton2.setVisible(true);
+                    teacherPanel.add(modifyButton2);
+                    modifyButton2.setVisible(true);
 
-                        teacherPanel.remove(saveButton);
-                        teacherPanel.remove(cancelButton);
+                    teacherPanel.remove(saveButton);
+                    teacherPanel.remove(cancelButton);
 
-                        // Refresh the panel to update its layout
-                        teacherPanel.revalidate();
-                        teacherPanel.repaint();
-                    }
+                    // Refresh the panel to update its layout
+                    teacherPanel.revalidate();
+                    teacherPanel.repaint();
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -968,7 +1071,7 @@ public class Student {
     void dashboard() {
         JLabel dashLabel = new JLabel("DASHBOARD");
         dashLabel.setBounds(20, 2, 100, 25);
-        dashLabel.setForeground(Color.LIGHT_GRAY);
+        dashLabel.setForeground(Color.GRAY);
         dashLabel.setFont(new Font("Arial", Font.BOLD, 11));
 
         String studentQuery = "SELECT count(*) from students";
@@ -1026,27 +1129,233 @@ public class Student {
 
         JLabel modificationRequestLabel = new JLabel("MODIFICATION REQUESTS");
         modificationRequestLabel.setBounds(20, 120, 200, 25);
-        modificationRequestLabel.setForeground(Color.LIGHT_GRAY);
+        modificationRequestLabel.setForeground(Color.GRAY);
         modificationRequestLabel.setFont(new Font("Arial", Font.BOLD, 11));
 
-        DefaultTableModel requestTableModel = new DefaultTableModel();
+        DefaultTableModel requestTableModel = new DefaultTableModel() {
+            public boolean isCellEditable(int row, int column) { // To Restrict Cell Editability
+                return false;
+            };
+        };
         requestTableModel.addColumn("Type");
-        requestTableModel.addColumn("Name");
+        requestTableModel.addColumn("User ID");
         requestTableModel.addColumn("Status");
 
         JTable requestTable = new JTable(requestTableModel);
+        requestTable.setRowHeight(20);
 
         TableColumnModel requestColumnModel = requestTable.getColumnModel();
-        requestColumnModel.getColumn(0).setPreferredWidth(70);
+        requestColumnModel.getColumn(0).setPreferredWidth(50);
         requestColumnModel.getColumn(1).setPreferredWidth(150);
-        requestColumnModel.getColumn(2).setPreferredWidth(80);
+        requestColumnModel.getColumn(2).setPreferredWidth(50);
 
         JScrollPane requestScrollPane = new JScrollPane(requestTable);
         requestScrollPane.setBounds(20, 155, 320, 220);
 
+        String query = "Select * from change_requests WHERE status='pending';";
+        try {
+            Statement state = con.createStatement();
+            ResultSet result = state.executeQuery(query);
+            while (result.next()) {
+                String[] row = { result.getString("user_type"), result.getString("user_id"),
+                        result.getString("status") };
+                requestTableModel.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        MyButtonBlue refreshButton = new MyButtonBlue("Refresh");
+        refreshButton.setBounds(278, 125, 60, 20);
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String refreshQuery = "Select * from change_requests WHERE status='pending';";
+                try {
+                    requestTableModel.setRowCount(0);
+                    Statement state = con.createStatement();
+                    ResultSet result = state.executeQuery(refreshQuery);
+                    while (result.next()) {
+                        String[] row = { result.getString("user_type"), result.getString("user_id"),
+                                result.getString("status") };
+                        requestTableModel.addRow(row);
+                    }
+                } catch (SQLException e2) {
+                    e2.printStackTrace();
+                }
+            }
+        });
+
+        MyButtonHoverBlue verifyButton = new MyButtonHoverBlue("Verify");
+        verifyButton.setBounds(360, 348, 70, 25);
+        verifyButton.setVisible(false);
+
+        MyButtonHoverGreen approveButton = new MyButtonHoverGreen("Approve");
+        approveButton.setBounds(440, 348, 70, 25);
+        approveButton.setVisible(false);
+
+        MyButtonHoverRed rejectButton = new MyButtonHoverRed("Reject");
+        rejectButton.setBounds(520, 348, 70, 25);
+        rejectButton.setVisible(false);
+
+        MyButtonWhite cancelButton = new MyButtonWhite("Cancel");
+        cancelButton.setBounds(600, 348, 70, 25);
+        cancelButton.setVisible(false);
+
+        JTextArea verifyDataArea = new JTextArea();
+        verifyDataArea.setLineWrap(true);
+        verifyDataArea.setWrapStyleWord(true);
+        verifyDataArea.setOpaque(false);
+        verifyDataArea.setFont(new Font("Arial", Font.BOLD, 13));
+        verifyDataArea.setForeground(Color.GRAY);
+        verifyDataArea.setBounds(360, 155, 320, 180);
+        verifyDataArea.setVisible(false);
+
+        requestTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (event.getValueIsAdjusting()) {
+                    return;
+                }
+                verifyButton.setVisible(true);
+
+                verifyButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        int selectedRow = requestTable.getSelectedRow();
+                        if (selectedRow != -1 && !event.getValueIsAdjusting()) {
+                            String userID = requestTable.getValueAt(selectedRow, 1).toString();
+                            String userType = requestTable.getValueAt(selectedRow, 0).toString();
+                            verifyButton.setVisible(true);
+
+                            String findUserRequestQuery = "Select * from change_requests where user_id='" + userID
+                                    + "';";
+                            try {
+                                verifyDataArea.setText("");
+                                verifyDataArea.setVisible(true);
+                                approveButton.setVisible(true);
+                                rejectButton.setVisible(true);
+                                cancelButton.setVisible(true);
+
+                                Statement state = con.createStatement();
+                                ResultSet result = state.executeQuery(findUserRequestQuery);
+                                result.next();
+
+                                if (userType.equals("student")) {
+                                    verifyDataArea.setText("\t\t" + result.getString(8) + "\nStatus : "
+                                            + result.getString(7).toUpperCase() + "\nProfile : "
+                                            + result.getString(2).toUpperCase()
+                                            + "\nUser ID : " + result.getString(3)
+                                            + "\n\n-- Updated Details --\n\nFather's Name : " + result.getString(4)
+                                            + "\nAddress : " + result.getString(5) + "\nContact : "
+                                            + result.getString(6)
+                                            + "\n");
+                                } else if (userType.equals("teacher")) {
+                                    verifyDataArea.setText("\t\t" + result.getString(8) + "\nStatus : "
+                                            + result.getString(7).toUpperCase() + "\nProfile : "
+                                            + result.getString(2).toUpperCase()
+                                            + "\nUser ID : " + result.getString(3)
+                                            + "\n\n-- Updated Details --\n\nDesignation : " + result.getString(4)
+                                            + "\nAddress : " + result.getString(5) + "\nContact : "
+                                            + result.getString(6)
+                                            + "\n");
+                                }
+                                adminSubPanel.repaint();
+                            } catch (SQLException e1) {
+                                e1.printStackTrace();
+                            }
+
+                            approveButton.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    try {
+                                        String approveQuery = "UPDATE change_requests SET status = 'approved' WHERE user_id =?;";
+                                        PreparedStatement pstmt = con.prepareStatement(approveQuery);
+                                        pstmt.setString(1, userID);
+                                        pstmt.executeUpdate();
+
+                                        String fetchNewDataQuery = "SELECT * FROM change_requests WHERE user_id =?;";
+                                        PreparedStatement pstmt2 = con.prepareStatement(fetchNewDataQuery);
+                                        pstmt2.setString(1, userID);
+                                        ResultSet newData = pstmt2.executeQuery();
+                                        newData.next();
+                                        String changable_field_1 = newData.getString("changable_field_1");
+                                        String changable_field_2 = newData.getString("changable_field_2");
+                                        String changable_field_3 = newData.getString("changable_field_3");
+
+                                        if (userType.equals("student")) {
+                                            String modifyStudentQuery = "UPDATE students SET Fathers_name = ?, Address = ?, Contact_no = ? WHERE Email_id = ?;";
+                                            PreparedStatement pstmt3 = con.prepareStatement(modifyStudentQuery);
+                                            pstmt3.setString(1, changable_field_1);
+                                            pstmt3.setString(2, changable_field_2);
+                                            pstmt3.setString(3, changable_field_3);
+                                            pstmt3.setString(4, userID);
+                                            pstmt3.executeUpdate();
+                                        } else if (userType.equals("teacher")) {
+                                            String modifyTeacherQuery = "UPDATE teachers SET Designation = ?, Address = ?, Contact_no = ? WHERE Email_id = ?;";
+                                            PreparedStatement pstmt4 = con.prepareStatement(modifyTeacherQuery);
+                                            pstmt4.setString(1, changable_field_1);
+                                            pstmt4.setString(2, changable_field_2);
+                                            pstmt4.setString(3, changable_field_3);
+                                            pstmt4.setString(4, userID);
+                                            pstmt4.executeUpdate();
+                                        }
+
+                                        JOptionPane.showMessageDialog(verifyDataArea, "Change Request Approved",
+                                                "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                                        verifyDataArea.setVisible(false);
+                                        approveButton.setVisible(false);
+                                        rejectButton.setVisible(false);
+                                        cancelButton.setVisible(false);
+                                        refreshButton.doClick();
+                                    } catch (SQLException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                };
+                            });
+
+                            rejectButton.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    try {
+                                        String rejectQuery = "UPDATE change_requests SET status = 'rejected' WHERE user_id =?;";
+                                        PreparedStatement pstmt = con.prepareStatement(rejectQuery);
+                                        pstmt.setString(1, userID);
+                                        pstmt.executeUpdate();
+
+                                        verifyDataArea.setVisible(false);
+                                        approveButton.setVisible(false);
+                                        rejectButton.setVisible(false);
+                                        cancelButton.setVisible(false);
+                                        refreshButton.doClick();
+                                    } catch (SQLException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                };
+                            });
+
+                            cancelButton.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    verifyDataArea.setVisible(false);
+                                    approveButton.setVisible(false);
+                                    rejectButton.setVisible(false);
+                                    cancelButton.setVisible(false);
+                                };
+                            });
+                        }
+                    };
+                });
+
+            }
+        });
+
         adminSubPanel.add(dashLabel);
         adminSubPanel.add(modificationRequestLabel);
         adminSubPanel.add(requestScrollPane);
+        adminSubPanel.add(refreshButton);
+        adminSubPanel.add(verifyButton);
+        adminSubPanel.add(approveButton);
+        adminSubPanel.add(rejectButton);
+        adminSubPanel.add(cancelButton);
+        adminSubPanel.add(verifyDataArea);
 
         adminPanel.add(adminSubPanel);
         adminPanel.revalidate();
@@ -1213,7 +1522,7 @@ public class Student {
                             preparedStmt.setString(6, addressField.getText());
                             preparedStmt.setString(7, contactField.getText());
                             preparedStmt.setInt(8, result.getInt(1));
-                            // preparedStmt.executeUpdate();
+                            preparedStmt.executeUpdate();
                             System.out.println(preparedStmt);
                             ImageIcon doneIcon = new ImageIcon("src//Assets//done.png");
                             Image doneImage = doneIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
@@ -1424,7 +1733,7 @@ public class Student {
                             preparedStmt.setString(6, addressField.getText());
                             preparedStmt.setString(7, contactField.getText());
                             preparedStmt.setInt(8, result.getInt(1));
-                            // preparedStmt.executeUpdate();
+                            preparedStmt.executeUpdate();
                             System.out.println(preparedStmt);
                             ImageIcon doneIcon = new ImageIcon("src//Assets//done.png");
                             Image doneImage = doneIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
