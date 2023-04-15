@@ -544,7 +544,6 @@ public class Student {
             public void actionPerformed(ActionEvent e) {
                 modifyButton.setVisible(false);
                 try {
-                    modifyStudent(user_email, father_name, address, contact);
                     // Check for existing Requests
                     String checkExistingQuery = "SELECT * FROM change_requests Where user_id='" + user_email
                             + "' ORDER BY created_at DESC;";
