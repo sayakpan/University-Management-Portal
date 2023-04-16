@@ -1,15 +1,12 @@
 import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Connection;
@@ -22,12 +19,10 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
@@ -40,6 +35,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
+import Theme.MyTheme.*;
 
 public class Student {
     Connection con;
@@ -60,283 +56,6 @@ public class Student {
         } catch (SQLException | ClassNotFoundException e) {
             System.out.println("Connection failed");
             e.printStackTrace();
-        }
-    }
-
-    // Theme Customisations
-
-    Color themeColor = new Color(10, 133, 204);
-    Color hoverColor = new Color(3, 116, 168);
-    Color greenColor = new Color(24, 168, 40);
-    Color yellowColor = new Color(255, 193, 7);
-    Color redColor = new Color(220, 53, 69);
-
-    class MyButtonBlue extends JButton implements MouseListener {
-        MyButtonBlue(String text) {
-            super(text);
-            setBackground(themeColor);
-            setForeground(Color.WHITE);
-            setBorder(BorderFactory.createLineBorder(themeColor));
-            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            addMouseListener(this);
-        }
-
-        // Implement MouseListener methods
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(hoverColor); // Set background color when mouse enters
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(themeColor); // Set background color back to default when mouse exits
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-        }
-    }
-
-    class MyButtonWhite extends MyButtonBlue {
-        MyButtonWhite(String text) {
-            super(text);
-            setBackground(Color.WHITE);
-            setForeground(Color.GRAY);
-            setBorder(BorderFactory.createLineBorder(Color.GRAY, 1));
-            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            addMouseListener(this);
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(Color.GRAY);
-            setForeground(Color.WHITE);
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(Color.WHITE);
-            setForeground(Color.GRAY);
-        }
-    }
-
-    class MyButtonGreen extends MyButtonBlue {
-        MyButtonGreen(String text) {
-            super(text);
-            setBackground(greenColor);
-            setForeground(Color.WHITE);
-            setBorder(BorderFactory.createLineBorder(greenColor));
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(new Color(8, 120, 21));
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(greenColor);
-        }
-
-    }
-
-    class MyButtonYellow extends MyButtonBlue {
-        MyButtonYellow(String text) {
-            super(text);
-            setBackground(yellowColor);
-            setForeground(Color.BLACK);
-            setBorder(BorderFactory.createLineBorder(yellowColor));
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(new Color(224, 168, 0));
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(yellowColor);
-        }
-
-    }
-
-    class MyButtonRed extends MyButtonBlue {
-        MyButtonRed(String text) {
-            super(text);
-            setBackground(redColor);
-            setForeground(Color.WHITE);
-            setBorder(BorderFactory.createLineBorder(redColor));
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(new Color(200, 35, 51));
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(redColor);
-        }
-
-    }
-
-    class MyButtonHoverBlue extends MyButtonBlue {
-        MyButtonHoverBlue(String text) {
-            super(text);
-            setBackground(Color.WHITE);
-            setForeground(themeColor);
-            setBorder(BorderFactory.createLineBorder(themeColor));
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(themeColor);
-            setForeground(Color.WHITE);
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(Color.WHITE);
-            setForeground(themeColor);
-        }
-
-    }
-
-    class MyButtonHoverGreen extends MyButtonBlue {
-        MyButtonHoverGreen(String text) {
-            super(text);
-            setBackground(Color.WHITE);
-            setForeground(greenColor);
-            setBorder(BorderFactory.createLineBorder(greenColor));
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(greenColor);
-            setForeground(Color.WHITE);
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(Color.WHITE);
-            setForeground(greenColor);
-        }
-    }
-
-    class MyButtonHoverRed extends MyButtonBlue {
-        MyButtonHoverRed(String text) {
-            super(text);
-            setBackground(Color.WHITE);
-            setForeground(redColor);
-            setBorder(BorderFactory.createLineBorder(redColor));
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(redColor);
-            setForeground(Color.WHITE);
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(Color.WHITE);
-            setForeground(redColor);
-        }
-    }
-
-    class MyButtonHoverYellow extends MyButtonBlue {
-        MyButtonHoverYellow(String text) {
-            super(text);
-            setBackground(Color.WHITE);
-            setForeground(yellowColor);
-            setBorder(BorderFactory.createLineBorder(yellowColor));
-
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(yellowColor);
-            setForeground(Color.WHITE);
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(Color.WHITE);
-            setForeground(yellowColor);
-        }
-    }
-
-    class DashboardCountButton extends MyButtonBlue {
-        DashboardCountButton(int count, String label, Color buttonColor) {
-            super("<html><div style='text-align: right;'><font size='6'><b>" + count + "</b></font><br><font size='3'>"
-                    + label + "</font></div></html>");
-            setOpaque(true);
-            setBackground(buttonColor);
-            setForeground(Color.WHITE);
-            setBorder(BorderFactory.createLineBorder(buttonColor));
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(getBackground().darker());
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(getBackground().brighter());
-        }
-    }
-
-    class JMenuItemTheme extends JMenuItem implements MouseListener {
-        JMenuItemTheme(String text) {
-            super(text);
-            setOpaque(true);
-            setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 10));
-            setBackground(themeColor);
-            setForeground(Color.WHITE);
-            setHorizontalAlignment(CENTER);
-            setFont(new Font("Calibri", Font.BOLD, 16));
-            addMouseListener(this);
-        }
-
-        @Override
-        public void mouseEntered(MouseEvent e) {
-            setBackground(hoverColor);
-            setFont(new Font("Calibri", Font.BOLD, 18));
-            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        }
-
-        @Override
-        public void mouseExited(MouseEvent e) {
-            setBackground(themeColor);
-            setFont(new Font("Calibri", Font.BOLD, 16));
-        }
-
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            setBackground(hoverColor);
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
         }
     }
 
@@ -376,7 +95,7 @@ public class Student {
 
         h2 = new JLabel("Login to Your Account");
         h2.setFont(new Font("Consolas", Font.BOLD, 25));
-        h2.setForeground(themeColor);
+        h2.setForeground(Theme.MyTheme.themeColor);
         h2.setBounds(520, 200, 300, 30);
 
         userLabel = new JLabel("Username :");
@@ -974,7 +693,7 @@ public class Student {
 
         JMenuBar menuBar = new JMenuBar();
         menuBar.setBounds(20, 110, 130, 390);
-        menuBar.setBackground(themeColor);
+        menuBar.setBackground(Theme.MyTheme.themeColor);
         menuBar.setLayout(new BoxLayout(menuBar, BoxLayout.PAGE_AXIS));
 
         // Menu Options
@@ -3206,7 +2925,7 @@ public class Student {
 
                 JTextField searchBar = new JTextField();
                 searchBar.setFont(new Font("Arial", Font.PLAIN, 15));
-                searchBar.setForeground(themeColor);
+                searchBar.setForeground(Theme.MyTheme.themeColor);
                 searchBar.setCaretColor(Color.ORANGE);
                 searchBar.setBorder(BorderFactory.createCompoundBorder(
                         BorderFactory.createMatteBorder(0, 0, 4, 4, new Color(222, 223, 224)),
