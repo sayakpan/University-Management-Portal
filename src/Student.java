@@ -18,8 +18,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
@@ -42,8 +40,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
-
-import com.mysql.cj.jdbc.result.ResultSetMetaData;
 
 public class Student {
     Connection con;
@@ -195,11 +191,121 @@ public class Student {
 
     }
 
+    class MyButtonHoverBlue extends MyButtonBlue {
+        MyButtonHoverBlue(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(themeColor);
+            setBorder(BorderFactory.createLineBorder(themeColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(themeColor);
+            setForeground(Color.WHITE);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(themeColor);
+        }
+
+    }
+
+    class MyButtonHoverGreen extends MyButtonBlue {
+        MyButtonHoverGreen(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(greenColor);
+            setBorder(BorderFactory.createLineBorder(greenColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(greenColor);
+            setForeground(Color.WHITE);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(greenColor);
+        }
+    }
+
+    class MyButtonHoverRed extends MyButtonBlue {
+        MyButtonHoverRed(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(redColor);
+            setBorder(BorderFactory.createLineBorder(redColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(redColor);
+            setForeground(Color.WHITE);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(redColor);
+        }
+    }
+
+    class MyButtonHoverYellow extends MyButtonBlue {
+        MyButtonHoverYellow(String text) {
+            super(text);
+            setBackground(Color.WHITE);
+            setForeground(yellowColor);
+            setBorder(BorderFactory.createLineBorder(yellowColor));
+
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(yellowColor);
+            setForeground(Color.WHITE);
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(Color.WHITE);
+            setForeground(yellowColor);
+        }
+    }
+
+    class DashboardCountButton extends MyButtonBlue {
+        DashboardCountButton(int count, String label, Color buttonColor) {
+            super("<html><div style='text-align: right;'><font size='6'><b>" + count + "</b></font><br><font size='3'>"
+                    + label + "</font></div></html>");
+            setOpaque(true);
+            setBackground(buttonColor);
+            setForeground(Color.WHITE);
+            setBorder(BorderFactory.createLineBorder(buttonColor));
+        }
+
+        @Override
+        public void mouseEntered(MouseEvent e) {
+            setBackground(getBackground().darker());
+        }
+
+        @Override
+        public void mouseExited(MouseEvent e) {
+            setBackground(getBackground().brighter());
+        }
+    }
+
     class JMenuItemTheme extends JMenuItem implements MouseListener {
         JMenuItemTheme(String text) {
             super(text);
             setOpaque(true);
-            setBorder(BorderFactory.createEmptyBorder(5, 16, 5, 10));
+            setBorder(BorderFactory.createEmptyBorder(5, 9, 5, 10));
             setBackground(themeColor);
             setForeground(Color.WHITE);
             setHorizontalAlignment(CENTER);
@@ -333,6 +439,19 @@ public class Student {
             }
         });
 
+        userField.addActionListener(new ActionListener() { // Press Enter to Login
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginButton.doClick();
+            }
+        });
+        passField.addActionListener(new ActionListener() { // Press Enter to Login
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loginButton.doClick();
+            }
+        });
+
         frame.add(loginPanel);
         loginPanel.add(h1);
         loginPanel.add(h2);
@@ -425,7 +544,34 @@ public class Student {
             public void actionPerformed(ActionEvent e) {
                 modifyButton.setVisible(false);
                 try {
-                    modifyStudent(user_email, father_name, address, contact);
+                    // Check for existing Requests
+                    String checkExistingQuery = "SELECT * FROM change_requests Where user_id='" + user_email
+                            + "' ORDER BY created_at DESC;";
+                    ResultSet existingEntry = stmt.executeQuery(checkExistingQuery);
+                    boolean isPresent = existingEntry.next();
+
+                    if (isPresent && existingEntry.getString("status").equals("pending")) {
+                        JOptionPane.showMessageDialog(studentPanel,
+                                "You already have a pending correction request.\nContact Admin for Approval.",
+                                "Request Already Exists", JOptionPane.WARNING_MESSAGE);
+                    } else if (isPresent && existingEntry.getString("status").equals("rejected")) {
+                        JOptionPane.showMessageDialog(studentPanel,
+                                "Your previous correction request was Rejected.\nMake changes carefully.",
+                                "Previous Request Rejected", JOptionPane.WARNING_MESSAGE);
+                        modifyButton.setVisible(false);
+                        modifyStudent(user_email, father_name, address, contact);
+                    } else if (isPresent && existingEntry.getString("status").equals("approved")) {
+                        int ifchange = JOptionPane.showConfirmDialog(studentPanel,
+                                "Your previous correction request was Approved.\n\nDo you want to change again ?",
+                                "Are you sure?", JOptionPane.YES_NO_OPTION);
+                        if (ifchange == JOptionPane.YES_OPTION) {
+                            modifyButton.setVisible(false);
+                            modifyStudent(user_email, father_name, address, contact);
+                        }
+                    } else {
+                        modifyButton.setVisible(false);
+                        modifyStudent(user_email, father_name, address, contact);
+                    }
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -481,11 +627,19 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String updateQuery = "UPDATE students SET Fathers_name='" + fatherNameField.getText() +
-                            "',Address='" + addressField.getText() + "',Contact_no='" + contactField.getText()
-                            + "' where Email_id='" + email + "';";
-                    stmt.executeUpdate(updateQuery);
 
+                    String updateRequestQuery = "INSERT INTO change_requests (user_type, user_id, changable_field_1, changable_field_2, changable_field_3, status) VALUES ('student', ?, ?, ?, ?, 'pending');";
+                    PreparedStatement pstmt = con.prepareStatement(updateRequestQuery);
+                    pstmt.setString(1, email);
+                    pstmt.setString(2, fatherNameField.getText());
+                    pstmt.setString(3, addressField.getText());
+                    pstmt.setString(4, contactField.getText());
+
+                    pstmt.executeUpdate();
+
+                    JOptionPane.showMessageDialog(studentPanel,
+                            "Your details modification request is sent to Admin.\nContact Admin for Approval",
+                            "Request Sent", JOptionPane.INFORMATION_MESSAGE);
                     // Replace the text fields with new labels showing the modified fields
 
                     father_name.setBounds(50, 180, 400, 30);
@@ -516,7 +670,6 @@ public class Student {
                     // Refresh the panel to update its layout
                     studentPanel.revalidate();
                     studentPanel.repaint();
-
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -630,9 +783,36 @@ public class Student {
         modifyButton2.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                modifyButton2.setVisible(false);
+
                 try {
-                    modifyTeacher(user_email, designation, address, contact);
+                    // Check for existing Requests
+                    String checkExistingQuery = "SELECT * FROM change_requests Where user_id='" + user_email
+                            + "' ORDER BY created_at DESC;";
+                    ResultSet existingEntry = stmt.executeQuery(checkExistingQuery);
+                    boolean isPresent = existingEntry.next();
+
+                    if (isPresent && existingEntry.getString("status").equals("pending")) {
+                        JOptionPane.showMessageDialog(teacherPanel,
+                                "You already have a pending correction request.\nContact Admin for Approval.",
+                                "Request Already Exists", JOptionPane.WARNING_MESSAGE);
+                    } else if (isPresent && existingEntry.getString("status").equals("rejected")) {
+                        JOptionPane.showMessageDialog(teacherPanel,
+                                "Your previous correction request was Rejected.\nMake changes carefully.",
+                                "Previous Request Rejected", JOptionPane.WARNING_MESSAGE);
+                        modifyButton2.setVisible(false);
+                        modifyTeacher(user_email, designation, address, contact);
+                    } else if (isPresent && existingEntry.getString("status").equals("approved")) {
+                        int ifchange = JOptionPane.showConfirmDialog(teacherPanel,
+                                "Your previous correction request was Approved.\n\nDo you want to change again ?",
+                                "Are you sure?", JOptionPane.YES_NO_OPTION);
+                        if (ifchange == JOptionPane.YES_OPTION) {
+                            modifyButton2.setVisible(false);
+                            modifyTeacher(user_email, designation, address, contact);
+                        }
+                    } else {
+                        modifyButton2.setVisible(false);
+                        modifyTeacher(user_email, designation, address, contact);
+                    }
                 } catch (SQLException e1) {
                     e1.printStackTrace();
                 }
@@ -688,11 +868,18 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    String updateQuery = "UPDATE teachers SET Designation='" + designationField.getText() +
-                            "',Address='" + addressField.getText() + "',Contact_no='" + contactField.getText()
-                            + "' where Email_id='" + email + "';";
-                    stmt.executeUpdate(updateQuery);
+                    String updateRequestQuery = "INSERT INTO change_requests (user_type, user_id, changable_field_1, changable_field_2, changable_field_3, status) VALUES ('teacher', ?, ?, ?, ?, 'pending');";
+                    PreparedStatement pstmt = con.prepareStatement(updateRequestQuery);
+                    pstmt.setString(1, email);
+                    pstmt.setString(2, designationField.getText());
+                    pstmt.setString(3, addressField.getText());
+                    pstmt.setString(4, contactField.getText());
 
+                    pstmt.executeUpdate();
+
+                    JOptionPane.showMessageDialog(studentPanel,
+                            "Your details modification request is sent to Admin.\nContact Admin for Approval",
+                            "Request Sent", JOptionPane.INFORMATION_MESSAGE);
                     // Replace the text fields with new labels showing the modified fields
 
                     designation.setBounds(50, 180, 400, 30);
@@ -723,7 +910,6 @@ public class Student {
                     // Refresh the panel to update its layout
                     teacherPanel.revalidate();
                     teacherPanel.repaint();
-
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
@@ -798,7 +984,7 @@ public class Student {
         JMenuItemTheme searchMenu = new JMenuItemTheme("Search");
         JMenuItemTheme updateMenu = new JMenuItemTheme("Update");
         JMenuItemTheme removeMenu = new JMenuItemTheme("Remove");
-        JMenuItemTheme feeMenu = new JMenuItemTheme("Fee Details");
+        JMenuItemTheme feeMenu = new JMenuItemTheme("Courses & Fees");
         JMenuItemTheme examMenu = new JMenuItemTheme("Examination");
 
         menuBar.add(dashboardMenu);
@@ -815,6 +1001,13 @@ public class Student {
         adminSubPanel.setLayout(null);
 
         // Action Listeners
+        dashboardMenu.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                adminSubPanel.removeAll();
+                dashboard();
+            }
+        });
 
         addMenu.addActionListener(new ActionListener() {
             @Override
@@ -836,7 +1029,7 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 adminSubPanel.removeAll();
-                SearchExistingProfile();
+                SearchExistingProfile("default");
             }
         });
 
@@ -852,7 +1045,7 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 adminSubPanel.removeAll();
-                feeStructure();
+                CourseAndFees();
             }
         });
 
@@ -860,7 +1053,7 @@ public class Student {
             @Override
             public void actionPerformed(ActionEvent e) {
                 adminSubPanel.removeAll();
-                adminSubPanel.repaint();
+                examinationMenu();
             }
         });
 
@@ -868,8 +1061,304 @@ public class Student {
         frame.add(adminPanel);
         adminPanel.add(h1);
         logoutBtn(adminPanel);
+        dashboardMenu.doClick();
 
         frame.setVisible(true);
+    }
+
+    // Method for Dashboard of Admin
+    void dashboard() {
+        JLabel dashLabel = new JLabel("DASHBOARD");
+        dashLabel.setBounds(20, 2, 100, 25);
+        dashLabel.setForeground(Color.GRAY);
+        dashLabel.setFont(new Font("Arial", Font.BOLD, 11));
+
+        String studentQuery = "SELECT count(*) from students";
+        String teachersQuery = "SELECT count(*) from teachers";
+        String courseQuery = "SELECT count(*) from courses";
+        try {
+            ResultSet studentCount = stmt.executeQuery(studentQuery);
+            studentCount.next();
+            DashboardCountButton studentBoxButton = new DashboardCountButton(studentCount.getInt(1), "STUDENT",
+                    new Color(8, 100, 252));
+            studentBoxButton.setBounds(20, 30, 150, 70);
+            adminSubPanel.add(studentBoxButton);
+
+            ResultSet teacherCount = stmt.executeQuery(teachersQuery);
+            teacherCount.next();
+            DashboardCountButton teacherBoxButton = new DashboardCountButton(teacherCount.getInt(1), "TEACHERS",
+                    new Color(44, 196, 128));
+            teacherBoxButton.setBounds(190, 30, 150, 70);
+            adminSubPanel.add(teacherBoxButton);
+
+            ResultSet courserCount = stmt.executeQuery(courseQuery);
+            courserCount.next();
+            DashboardCountButton courseBoxButton = new DashboardCountButton(courserCount.getInt(1), "COURSES",
+                    new Color(244, 153, 14));
+            courseBoxButton.setBounds(360, 30, 150, 70);
+            adminSubPanel.add(courseBoxButton);
+
+            DashboardCountButton examBoxButton = new DashboardCountButton(2, "EXAMS", new Color(250, 100, 105));
+            examBoxButton.setBounds(530, 30, 150, 70);
+            adminSubPanel.add(examBoxButton);
+
+            studentBoxButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SearchExistingProfile("student");
+                }
+            });
+
+            teacherBoxButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SearchExistingProfile("teacher");
+                }
+            });
+
+            courseBoxButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    CourseAndFees();
+                }
+            });
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        JLabel modificationRequestLabel = new JLabel("MODIFICATION REQUESTS");
+        modificationRequestLabel.setBounds(20, 120, 200, 25);
+        modificationRequestLabel.setForeground(Color.GRAY);
+        modificationRequestLabel.setFont(new Font("Arial", Font.BOLD, 11));
+
+        DefaultTableModel requestTableModel = new DefaultTableModel() {
+            public boolean isCellEditable(int row, int column) { // To Restrict Cell Editability
+                return false;
+            };
+        };
+        requestTableModel.addColumn("Type");
+        requestTableModel.addColumn("User ID");
+        requestTableModel.addColumn("Status");
+
+        JTable requestTable = new JTable(requestTableModel);
+        requestTable.setRowHeight(20);
+
+        TableColumnModel requestColumnModel = requestTable.getColumnModel();
+        requestColumnModel.getColumn(0).setPreferredWidth(50);
+        requestColumnModel.getColumn(1).setPreferredWidth(150);
+        requestColumnModel.getColumn(2).setPreferredWidth(50);
+
+        JScrollPane requestScrollPane = new JScrollPane(requestTable);
+        requestScrollPane.setBounds(20, 155, 320, 220);
+
+        String query = "Select * from change_requests WHERE status='pending';";
+        try {
+            Statement state = con.createStatement();
+            ResultSet result = state.executeQuery(query);
+            while (result.next()) {
+                String[] row = { result.getString("user_type"), result.getString("user_id"),
+                        result.getString("status") };
+                requestTableModel.addRow(row);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        MyButtonBlue refreshButton = new MyButtonBlue("Refresh");
+        refreshButton.setBounds(278, 125, 60, 20);
+        refreshButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String refreshQuery = "Select * from change_requests WHERE status='pending';";
+                try {
+                    requestTableModel.setRowCount(0);
+                    Statement state = con.createStatement();
+                    ResultSet result = state.executeQuery(refreshQuery);
+                    while (result.next()) {
+                        String[] row = { result.getString("user_type"), result.getString("user_id"),
+                                result.getString("status") };
+                        requestTableModel.addRow(row);
+                    }
+                } catch (SQLException e2) {
+                    e2.printStackTrace();
+                }
+            }
+        });
+
+        MyButtonHoverBlue verifyButton = new MyButtonHoverBlue("Verify");
+        verifyButton.setBounds(360, 348, 70, 25);
+        verifyButton.setVisible(false);
+
+        MyButtonHoverGreen approveButton = new MyButtonHoverGreen("Approve");
+        approveButton.setBounds(440, 348, 70, 25);
+        approveButton.setVisible(false);
+
+        MyButtonHoverRed rejectButton = new MyButtonHoverRed("Reject");
+        rejectButton.setBounds(520, 348, 70, 25);
+        rejectButton.setVisible(false);
+
+        MyButtonWhite cancelButton = new MyButtonWhite("Cancel");
+        cancelButton.setBounds(600, 348, 70, 25);
+        cancelButton.setVisible(false);
+
+        JTextArea verifyDataArea = new JTextArea();
+        verifyDataArea.setLineWrap(true);
+        verifyDataArea.setWrapStyleWord(true);
+        verifyDataArea.setOpaque(false);
+        verifyDataArea.setFont(new Font("Arial", Font.BOLD, 13));
+        verifyDataArea.setForeground(Color.GRAY);
+        verifyDataArea.setBounds(360, 155, 320, 180);
+        verifyDataArea.setVisible(false);
+
+        requestTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (event.getValueIsAdjusting()) {
+                    return;
+                }
+                verifyButton.setVisible(true);
+
+                verifyButton.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        int selectedRow = requestTable.getSelectedRow();
+                        if (selectedRow != -1 && !event.getValueIsAdjusting()) {
+                            String userID = requestTable.getValueAt(selectedRow, 1).toString();
+                            String userType = requestTable.getValueAt(selectedRow, 0).toString();
+                            verifyButton.setVisible(true);
+
+                            String findUserRequestQuery = "Select * from change_requests where user_id='" + userID
+                                    + "';";
+                            try {
+                                verifyDataArea.setText("");
+                                verifyDataArea.setVisible(true);
+                                approveButton.setVisible(true);
+                                rejectButton.setVisible(true);
+                                cancelButton.setVisible(true);
+
+                                Statement state = con.createStatement();
+                                ResultSet result = state.executeQuery(findUserRequestQuery);
+                                result.next();
+
+                                if (userType.equals("student")) {
+                                    verifyDataArea.setText("\t\t" + result.getString(8) + "\nStatus : "
+                                            + result.getString(7).toUpperCase() + "\nProfile : "
+                                            + result.getString(2).toUpperCase()
+                                            + "\nUser ID : " + result.getString(3)
+                                            + "\n\n-- Updated Details --\n\nFather's Name : " + result.getString(4)
+                                            + "\nAddress : " + result.getString(5) + "\nContact : "
+                                            + result.getString(6)
+                                            + "\n");
+                                } else if (userType.equals("teacher")) {
+                                    verifyDataArea.setText("\t\t" + result.getString(8) + "\nStatus : "
+                                            + result.getString(7).toUpperCase() + "\nProfile : "
+                                            + result.getString(2).toUpperCase()
+                                            + "\nUser ID : " + result.getString(3)
+                                            + "\n\n-- Updated Details --\n\nDesignation : " + result.getString(4)
+                                            + "\nAddress : " + result.getString(5) + "\nContact : "
+                                            + result.getString(6)
+                                            + "\n");
+                                }
+                                adminSubPanel.repaint();
+                            } catch (SQLException e1) {
+                                e1.printStackTrace();
+                            }
+
+                            approveButton.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    try {
+                                        String approveQuery = "UPDATE change_requests SET status = 'approved' WHERE user_id =?;";
+                                        PreparedStatement pstmt = con.prepareStatement(approveQuery);
+                                        pstmt.setString(1, userID);
+                                        pstmt.executeUpdate();
+
+                                        String fetchNewDataQuery = "SELECT * FROM change_requests WHERE user_id =?;";
+                                        PreparedStatement pstmt2 = con.prepareStatement(fetchNewDataQuery);
+                                        pstmt2.setString(1, userID);
+                                        ResultSet newData = pstmt2.executeQuery();
+                                        newData.next();
+                                        String changable_field_1 = newData.getString("changable_field_1");
+                                        String changable_field_2 = newData.getString("changable_field_2");
+                                        String changable_field_3 = newData.getString("changable_field_3");
+
+                                        if (userType.equals("student")) {
+                                            String modifyStudentQuery = "UPDATE students SET Fathers_name = ?, Address = ?, Contact_no = ? WHERE Email_id = ?;";
+                                            PreparedStatement pstmt3 = con.prepareStatement(modifyStudentQuery);
+                                            pstmt3.setString(1, changable_field_1);
+                                            pstmt3.setString(2, changable_field_2);
+                                            pstmt3.setString(3, changable_field_3);
+                                            pstmt3.setString(4, userID);
+                                            pstmt3.executeUpdate();
+                                        } else if (userType.equals("teacher")) {
+                                            String modifyTeacherQuery = "UPDATE teachers SET Designation = ?, Address = ?, Contact_no = ? WHERE Email_id = ?;";
+                                            PreparedStatement pstmt4 = con.prepareStatement(modifyTeacherQuery);
+                                            pstmt4.setString(1, changable_field_1);
+                                            pstmt4.setString(2, changable_field_2);
+                                            pstmt4.setString(3, changable_field_3);
+                                            pstmt4.setString(4, userID);
+                                            pstmt4.executeUpdate();
+                                        }
+
+                                        JOptionPane.showMessageDialog(verifyDataArea, "Change Request Approved",
+                                                "Success", JOptionPane.INFORMATION_MESSAGE);
+
+                                        verifyDataArea.setVisible(false);
+                                        approveButton.setVisible(false);
+                                        rejectButton.setVisible(false);
+                                        cancelButton.setVisible(false);
+                                        refreshButton.doClick();
+                                    } catch (SQLException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                };
+                            });
+
+                            rejectButton.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    try {
+                                        String rejectQuery = "UPDATE change_requests SET status = 'rejected' WHERE user_id =?;";
+                                        PreparedStatement pstmt = con.prepareStatement(rejectQuery);
+                                        pstmt.setString(1, userID);
+                                        pstmt.executeUpdate();
+
+                                        verifyDataArea.setVisible(false);
+                                        approveButton.setVisible(false);
+                                        rejectButton.setVisible(false);
+                                        cancelButton.setVisible(false);
+                                        refreshButton.doClick();
+                                    } catch (SQLException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                };
+                            });
+
+                            cancelButton.addActionListener(new ActionListener() {
+                                public void actionPerformed(ActionEvent e) {
+                                    verifyDataArea.setVisible(false);
+                                    approveButton.setVisible(false);
+                                    rejectButton.setVisible(false);
+                                    cancelButton.setVisible(false);
+                                };
+                            });
+                        }
+                    };
+                });
+
+            }
+        });
+
+        adminSubPanel.add(dashLabel);
+        adminSubPanel.add(modificationRequestLabel);
+        adminSubPanel.add(requestScrollPane);
+        adminSubPanel.add(refreshButton);
+        adminSubPanel.add(verifyButton);
+        adminSubPanel.add(approveButton);
+        adminSubPanel.add(rejectButton);
+        adminSubPanel.add(cancelButton);
+        adminSubPanel.add(verifyDataArea);
+
+        adminPanel.add(adminSubPanel);
+        adminPanel.revalidate();
+        adminPanel.repaint();
     }
 
     // Method to Add Profiles from Admin
@@ -1032,7 +1521,7 @@ public class Student {
                             preparedStmt.setString(6, addressField.getText());
                             preparedStmt.setString(7, contactField.getText());
                             preparedStmt.setInt(8, result.getInt(1));
-                            // preparedStmt.executeUpdate();
+                            preparedStmt.executeUpdate();
                             System.out.println(preparedStmt);
                             ImageIcon doneIcon = new ImageIcon("src//Assets//done.png");
                             Image doneImage = doneIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
@@ -1243,7 +1732,7 @@ public class Student {
                             preparedStmt.setString(6, addressField.getText());
                             preparedStmt.setString(7, contactField.getText());
                             preparedStmt.setInt(8, result.getInt(1));
-                            // preparedStmt.executeUpdate();
+                            preparedStmt.executeUpdate();
                             System.out.println(preparedStmt);
                             ImageIcon doneIcon = new ImageIcon("src//Assets//done.png");
                             Image doneImage = doneIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
@@ -1801,7 +2290,7 @@ public class Student {
 
     // Method to Search any Existing Profile from Admin
 
-    void SearchExistingProfile() {
+    void SearchExistingProfile(String defaultClick) {
         JRadioButton searchStudent = new JRadioButton("Search Student Profile");
         searchStudent.setBounds(20, 15, 170, 30);
         searchStudent.setBackground(adminSubPanel.getBackground());
@@ -2123,10 +2612,15 @@ public class Student {
         adminSubPanel.add(searchStudent);
         adminSubPanel.add(searchTeacher);
 
+        if (defaultClick.equals("student")) {
+            searchStudent.doClick();
+        } else if (defaultClick.equals("teacher")) {
+            searchTeacher.doClick();
+        }
+
         adminPanel.add(adminSubPanel);
         adminPanel.revalidate();
         adminPanel.repaint();
-
     }
 
     // Method to Update any Existing Profile from Admin
@@ -2676,30 +3170,350 @@ public class Student {
         adminPanel.repaint();
     }
 
-    // method for fees structure
-     void feeStructure(){
+    // Method to Examination Menu from Admin
 
-        adminSubPanel.removeAll();
+    void examinationMenu() {
+        JRadioButton displayResults = new JRadioButton("Display Student Result");
+        displayResults.setBounds(20, 15, 175, 30);
+        displayResults.setBackground(adminSubPanel.getBackground());
+
+        JRadioButton studentMarks = new JRadioButton("Student Marks System");
+        studentMarks.setBounds(200, 15, 175, 30);
+        studentMarks.setBackground(adminSubPanel.getBackground());
+
+        ButtonGroup RadioButtonGroup = new ButtonGroup();
+        RadioButtonGroup.add(studentMarks);
+        RadioButtonGroup.add(displayResults);
+
+        displayResults.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Student Add Marks Triggered");
+
+                adminSubPanel.removeAll();
+                adminSubPanel.add(studentMarks);
+                adminSubPanel.add(displayResults);
+                adminSubPanel.repaint();
+                adminSubPanel.revalidate();
+
+                JLabel enterRolLabel = new JLabel("Enter Roll Number to see Results");
+                enterRolLabel.setBounds(215, 130, 350, 25);
+                enterRolLabel.setFont(new Font("Arial", Font.PLAIN, 18));
+
+                MyButtonGreen searchButton = new MyButtonGreen("Search");
+                searchButton.setBounds(520, 180, 90, 33);
+                searchButton.setBorder(BorderFactory.createMatteBorder(0, 0, 4, 4, new Color(222, 223, 224)));
+
+                JTextField searchBar = new JTextField();
+                searchBar.setFont(new Font("Arial", Font.PLAIN, 15));
+                searchBar.setForeground(themeColor);
+                searchBar.setCaretColor(Color.ORANGE);
+                searchBar.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 4, 4, new Color(222, 223, 224)),
+                        BorderFactory.createLineBorder(Color.BLACK)));
+                searchBar.setBounds(100, 180, 400, 35);
+                searchBar.addActionListener(new ActionListener() { // Performs Search on Clicking "Enter"
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        searchButton.doClick();
+                    }
+                });
+
+                MyButtonYellow backButton = new MyButtonYellow("Back");
+                backButton.setBounds(20, 80, 70, 25);
+                backButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        displayResults.doClick();
+                    }
+                });
+                backButton.setVisible(false);
+
+                JLabel nameLabel = new JLabel("Student Name :");
+                nameLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                nameLabel.setBounds(20, 140, 300, 20);
+
+                JLabel rollLabel = new JLabel("Roll Number :");
+                rollLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                rollLabel.setBounds(20, 160, 300, 20);
+
+                JLabel courseLabel = new JLabel("Course :");
+                courseLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                courseLabel.setBounds(20, 180, 300, 20);
+
+                JLabel branchLabel = new JLabel("Branch :");
+                branchLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branchLabel.setBounds(20, 190, 80, 40);
+
+                JTextArea branchTextArea = new JTextArea();
+                branchTextArea.setFont(new Font("Consolas", Font.PLAIN, 16));
+                branchTextArea.setOpaque(false);
+                branchTextArea.setLineWrap(true);
+                branchTextArea.setWrapStyleWord(true);
+                branchTextArea.setBounds(100, 200, 200, 50);
+
+                JLabel semesterLabel = new JLabel("Select Semester :");
+                semesterLabel.setFont(new Font("Consolas", Font.PLAIN, 16));
+                semesterLabel.setBounds(20, 270, 150, 20);
+
+                Choice semesterChoice = new Choice();
+                semesterChoice.setBounds(180, 270, 130, 16);
+                semesterChoice.add("-- Select Semester --");
+
+                MyButtonHoverBlue displayResultButton = new MyButtonHoverBlue("Display Result");
+                displayResultButton.setBounds(180, 310, 130, 25);
+
+                DefaultTableModel resultModel = new DefaultTableModel() {
+                    public boolean isCellEditable(int row, int column) { // To Restrict Cell Editability
+                        return false;
+                    };
+                };
+
+                resultModel.addColumn("Subject Name");
+                resultModel.addColumn("Score");
+                resultModel.addColumn("Grade");
+
+                JTable resultTable = new JTable(resultModel);
+                resultTable.setRowHeight(32);
+                resultTable.setBackground(new Color(232, 246, 255));
+                resultTable.setForeground(Color.BLACK);
+                resultTable.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+                TableColumnModel columnModel = resultTable.getColumnModel();
+                columnModel.getColumn(0).setPreferredWidth(200);
+                columnModel.getColumn(1).setPreferredWidth(70);
+                columnModel.getColumn(2).setPreferredWidth(70);
+
+                JScrollPane resultScrollPane = new JScrollPane(resultTable);
+                resultScrollPane.getViewport().add(resultTable);
+                resultScrollPane.setBounds(335, 140, 350, 152);
+
+                JTextArea totalLabel = new JTextArea();
+                totalLabel.setFont(new Font("ARIAL", Font.BOLD, 14));
+                totalLabel.setBounds(375, 310, 220, 60);
+                totalLabel.setOpaque(false);
+                totalLabel.setLineWrap(true);
+                totalLabel.setWrapStyleWord(true);
+
+                nameLabel.setVisible(false);
+                rollLabel.setVisible(false);
+                courseLabel.setVisible(false);
+                branchLabel.setVisible(false);
+                branchTextArea.setVisible(false);
+                semesterLabel.setVisible(false);
+                semesterChoice.setVisible(false);
+                displayResultButton.setVisible(false);
+                resultScrollPane.setVisible(false);
+                totalLabel.setVisible(false);
+
+                searchButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        try {
+                            String searchKey = searchBar.getText();
+                            String searchQuery = "Select * from students,courses where students.Course_ID=courses.Course_ID and Roll_No = ?";
+                            PreparedStatement pstmt = con.prepareStatement(searchQuery);
+                            pstmt.setString(1, searchKey);
+                            ResultSet searchResult = pstmt.executeQuery();
+                            if (!searchResult.isBeforeFirst()) {
+                                JOptionPane.showMessageDialog(adminSubPanel,
+                                        "No results found. Check the Roll Number and try again", "No Results",
+                                        JOptionPane.ERROR_MESSAGE);
+                            } else {
+                                searchResult.next();
+
+                                searchBar.setVisible(false);
+                                searchButton.setVisible(false);
+                                enterRolLabel.setVisible(false);
+                                backButton.setVisible(true);
+
+                                nameLabel.setVisible(true);
+                                rollLabel.setVisible(true);
+                                courseLabel.setVisible(true);
+                                branchLabel.setVisible(true);
+                                branchTextArea.setVisible(true);
+                                semesterLabel.setVisible(true);
+                                semesterChoice.setVisible(true);
+                                resultScrollPane.setVisible(false);
+                                totalLabel.setVisible(false);
+
+                                // Search the entered Roll Number
+                                int RollNo = searchResult.getInt("Roll_No");
+                                nameLabel.setText("Student Name : " + searchResult.getString("First_name") + " "
+                                        + searchResult.getString("Last_name"));
+                                rollLabel.setText("Roll Number : " + RollNo);
+                                courseLabel.setText("Course : " + searchResult.getString("Course_Name"));
+                                branchTextArea.setText(searchResult.getString("Branch"));
+
+                                // Fetch Number of Sem in Checkbox
+                                semesterChoice.removeAll();
+                                semesterChoice.add("-- Select Semester --");
+                                for (int i = 1; i <= searchResult.getInt("No_of_Semesters"); i++) {
+                                    semesterChoice.add("Semester " + i);
+                                }
+
+                                semesterChoice.addItemListener(new ItemListener() {
+                                    public void itemStateChanged(ItemEvent e) {
+                                        if ((semesterChoice.getSelectedIndex() == 0) || (e.getStateChange() == 0)) {
+                                            displayResultButton.setVisible(false);
+                                            adminSubPanel.repaint();
+                                            adminSubPanel.revalidate();
+                                        } else {
+                                            displayResultButton.setVisible(true);
+                                        }
+                                    }
+                                });
+
+                                // Display new Action Listener
+                                displayResultButton.addActionListener(new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        System.out.println("Selected semester: " + semesterChoice.getSelectedIndex());
+                                        resultModel.setRowCount(0);
+                                        // Fetch Marks
+                                        try {
+                                            String marksQuery = "SELECT * FROM marks JOIN subjects ON marks.subject_id = subjects.id  WHERE marks.Roll_No = ? AND subjects.semester = ?;";
+                                            PreparedStatement pstmt2 = con.prepareStatement(marksQuery);
+                                            ;
+                                            pstmt2.setInt(1, RollNo);
+                                            pstmt2.setInt(2, semesterChoice.getSelectedIndex());
+                                            ResultSet result = pstmt2.executeQuery();
+
+                                            while (result.next()) {
+                                                String[] row = { result.getString("subjectName"),
+                                                        result.getString("marks"), result.getString("letter_grade") };
+                                                resultModel.addRow(row);
+                                            }
+
+                                            // Find Total of each Semester
+                                            String totalQuery = "	SELECT * FROM studentdb.results_total where Roll_No = ? And semester=?;";
+                                            PreparedStatement pstmt3 = con.prepareStatement(totalQuery);
+                                            pstmt3.setInt(1, RollNo);
+                                            pstmt3.setInt(2, semesterChoice.getSelectedIndex());
+                                            ResultSet totalResult = pstmt3.executeQuery();
+                                            totalResult.next();
+                                            totalLabel
+                                                    .setText("Total Marks Obtained : " + totalResult.getString("total")
+                                                            + "\nGrade : " + totalResult.getString("letter_grade")
+                                                            + "\nSGPA : " + totalResult.getString("sgpa"));
+                                        } catch (SQLException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                        resultScrollPane.setVisible(true);
+                                        totalLabel.setVisible(true);
+
+                                    }
+                                });
+                            }
+                        } catch (SQLException e1) {
+                            e1.getStackTrace();
+                        }
+                    }
+                });
+
+                adminSubPanel.add(nameLabel);
+                adminSubPanel.add(rollLabel);
+                adminSubPanel.add(courseLabel);
+                adminSubPanel.add(branchLabel);
+                adminSubPanel.add(branchTextArea);
+                adminSubPanel.add(semesterLabel);
+                adminSubPanel.add(semesterChoice);
+                adminSubPanel.add(displayResultButton);
+                adminSubPanel.add(resultScrollPane);
+                adminSubPanel.add(totalLabel);
+
+                adminSubPanel.add(enterRolLabel);
+                adminSubPanel.add(searchBar);
+                adminSubPanel.add(searchButton);
+                adminSubPanel.add(backButton);
+
+                adminSubPanel.revalidate();
+                adminSubPanel.repaint();
+            }
+        });
+
+        studentMarks.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.out.println("Student Display Marks Triggered");
+
+                adminSubPanel.removeAll();
+                adminSubPanel.add(studentMarks);
+                adminSubPanel.add(displayResults);
+                adminSubPanel.repaint();
+                adminSubPanel.revalidate();
+                String[] columnNames = {"Marks", "Grade"};
+                Object[][] data = {
+                    {"90-100", "O"},
+                    {"80-89", "E"},
+                    {"60-79", "A"},
+                    {"50-60", "B"},
+                    {"40-50", "C"},
+                    {"35-40", "D"},
+                    {"<35","F"}
+                };
+                JTable marksTable = new JTable(data, columnNames);
+                marksTable.setRowHeight(30);
+                marksTable.setFont(new Font("Arial", Font.BOLD, 14));
+                marksTable.setBackground(new Color(232, 246, 255));
+                marksTable.setForeground(Color.BLACK);
+                marksTable.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+                JScrollPane scrollPane = new JScrollPane(marksTable);
+                scrollPane.setBounds(80, 110, 380, 233);         
+                adminSubPanel.add(scrollPane); 
+            }
+        });
+        adminSubPanel.add(studentMarks);
+        adminSubPanel.add(displayResults);
+
+        adminPanel.add(adminSubPanel);
+        adminPanel.revalidate();
+        adminPanel.repaint();
+    }
+
+    // Method for fees structure
+
+    void CourseAndFees() {
+        adminSubPanel.repaint();
+        adminSubPanel.revalidate();
+
         JLabel course = new JLabel("Course :");
-       course.setFont(new Font("Consolas", Font.BOLD, 18));
-       course.setBounds(20, 50, 100, 30);
-       adminSubPanel.add(course);
+        course.setFont(new Font("Consolas", Font.PLAIN, 16));
+        course.setBounds(20, 25, 70, 30);
+        adminSubPanel.add(course);
+
+        String[] courseList = { "-- Select Course --", "BCA", "MCA", "BTECH", "BBA", "MBA" };
+        JComboBox<String> courseComboBox = new JComboBox<String>(courseList);
+        courseComboBox.setBounds(100, 25, 140, 25);
+        adminSubPanel.add(courseComboBox);
 
         JLabel branch = new JLabel("Branch :");
-        branch.setFont(new Font("Consolas", Font.BOLD, 18));
-        branch.setBounds(360, 50, 100, 30);
+        branch.setFont(new Font("Consolas", Font.PLAIN, 16));
+        branch.setBounds(20, 60, 70, 30);
 
         String[] branchList = { "-- Select Branch --", "Mechanical Engineering",
-        "Electronics and Communication Engineering", "Electrical Engineering",
-        "Computer Science Engineering", "Civil Engineering"};
-
+                "Electronics and Communication Engineering", "Electrical Engineering",
+                "Computer Science Engineering", "Civil Engineering" };
         JComboBox<String> branchComboBox = new JComboBox<String>(branchList);
-        branchComboBox.setBounds(470, 50, 200, 25);
+        branchComboBox.setBounds(100, 60, 240, 25);
 
-        String[] courseList = { "-- Select Course --","BCA", "MCA", "BTECH", "BBA", "MBA" };
-        JComboBox<String> courseComboBox = new JComboBox<String>(courseList);
-        courseComboBox.setBounds(140, 50, 200, 25);
-        adminSubPanel.add(courseComboBox);
+        DefaultTableModel feesTableModel = new DefaultTableModel() {
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            };
+        };
+        feesTableModel.addColumn("Semester");
+        feesTableModel.addColumn("Fees (in Rs.)");
+
+        JTable feesTable = new JTable(feesTableModel);
+        feesTable.setRowHeight(30);
+        feesTable.setFont(new Font("Arial", Font.BOLD, 12));
+
+        JScrollPane scrollPane = new JScrollPane(feesTable);
+        scrollPane.setBounds(20, 110, 350, 265);
+        adminSubPanel.add(scrollPane);
+        scrollPane.setVisible(false);
 
         courseComboBox.addActionListener(new ActionListener() {
             @Override
@@ -2716,80 +3530,48 @@ public class Student {
             }
         });
 
-// create a table to display the results
-JTable resultTable = new JTable();
-Color ivory=new Color(255,255,208);
-resultTable.setOpaque(false);
-resultTable.setBackground(ivory);
-resultTable.setRowHeight(30);
-resultTable.setFont(new Font("Arial", Font.BOLD, 12));
+        // add a button to query
+        MyButtonGreen searchButton = new MyButtonGreen("Search");
+        searchButton.setBounds(580, 25, 90, 25);
+        adminSubPanel.add(searchButton);
+        searchButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // get the selected course and branch
+                String selectedCourse = (String) courseComboBox.getSelectedItem();
+                String selectedBranch = (String) branchComboBox.getSelectedItem();
+                String query = "SELECT * FROM fees ,courses WHERE Course_Name='" + selectedCourse
+                        + "'and courses.Course_ID=fees.Course_ID";
+                if (selectedCourse.equals("BTECH")) {
+                    query += " AND Branch='" + selectedBranch + "'";
+                }
+                try {
+                    scrollPane.setVisible(true);
+                    feesTableModel.setRowCount(0);
+                    ResultSet result = stmt.executeQuery(query);
 
-// create a scroll pane to hold the table
-JScrollPane scrollPane = new JScrollPane(resultTable);
-scrollPane.setBounds(10, 130, 650, 250);
-adminSubPanel.add(scrollPane);
+                    // populate the table model with the results
+                    while (result.next()) {
+                        int NumOfSemester = result.getInt("No_of_Semesters");
 
-// add a button to  query
-MyButtonGreen searchButton = new MyButtonGreen("Search");
-searchButton.setBounds(600, 10, 90, 25);
-adminSubPanel.add(searchButton);
-searchButton.addActionListener(new ActionListener() { 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        // get the selected course and branch
-        String selectedCourse = (String) courseComboBox.getSelectedItem();
-        String selectedBranch = (String) branchComboBox.getSelectedItem();
-        String query = "SELECT * FROM fees ,courses WHERE Course_Name='" + selectedCourse + "'and courses.Course_ID=fees.Course_ID";
-        if (selectedCourse.equals("BTECH")) {
-            query += " AND Branch='" + selectedBranch + "'";
-        }
-        try {              
-            ResultSet resultSet = stmt.executeQuery(query);
-
-            // create a table model to hold the results
-            DefaultTableModel tableModel = new DefaultTableModel(){          
-                    public boolean isCellEditable(int row, int column) { 
-                        return false;
-            };
-        };
-        tableModel.addColumn("Semester");
-        tableModel.addColumn("Fees");
-        
-            // populate the table model with the results
-            while (resultSet.next()) {
-                String Semester1 = resultSet.getString("semester1");
-                String Semester2 = resultSet.getString("semester2");
-                String Semester3 = resultSet.getString("semester3");
-                String Semester4 = resultSet.getString("semester4");
-                String Semester5 = resultSet.getString("semester5");
-                String Semester6 = resultSet.getString("semester6");
-                String Semester7 = resultSet.getString("semester7");
-                String Semester8 = resultSet.getString("semester8");
-                
-        tableModel.addRow(new Object[]{"Semester 1", Semester1});
-        tableModel.addRow(new Object[]{"Semester 2", Semester2});
-        tableModel.addRow(new Object[]{"Semester 3", Semester3});
-        tableModel.addRow(new Object[]{"Semester 4", Semester4});
-        tableModel.addRow(new Object[]{"Semester 5", Semester5});
-        tableModel.addRow(new Object[]{"Semester 6", Semester6});
-        tableModel.addRow(new Object[]{"Semester 7", Semester7});
-        tableModel.addRow(new Object[]{"Semester 8", Semester8});
-
-                adminSubPanel.revalidate();
-                adminSubPanel.repaint();         
-            }      
-            // set the table model to the result table
-            resultTable.setModel(tableModel);
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        }
-    }
-});
-       adminPanel.add(adminSubPanel);       
+                        for (int i = 1; i <= NumOfSemester; i++) {
+                            String[] row = { "Semester " + i, result.getString(i + 1) };
+                            feesTableModel.addRow(row);
+                        }
+                    }
+                    adminSubPanel.revalidate();
+                    adminSubPanel.repaint();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+        adminPanel.add(adminSubPanel);
         adminSubPanel.setVisible(true);
         adminPanel.revalidate();
         adminPanel.repaint();
-        }
+    }
+
     // LOGOUT Button Method
 
     void logoutBtn(JPanel removePanel) {
