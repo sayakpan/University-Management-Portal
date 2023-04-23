@@ -73,6 +73,8 @@ public class Student {
         frame.setSize(1080, 720);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
+        ImageIcon icon = new ImageIcon("bin//Assets//Student_icon.png");
+        frame.setIconImage(icon.getImage());
         loginPage();
     }
 
@@ -112,7 +114,7 @@ public class Student {
         passField = new JPasswordField("admin");
         passField.setBounds(520, 370, 300, 30);
 
-        ImageIcon imageIcon = new ImageIcon("src//Assets//login.png");
+        ImageIcon imageIcon = new ImageIcon("bin//Assets//login.png");
         Image image = imageIcon.getImage().getScaledInstance(300, -1, Image.SCALE_SMOOTH);
         ImageIcon scaledImageIcon = new ImageIcon(image);
         image1 = new JLabel(scaledImageIcon);
@@ -1242,7 +1244,7 @@ public class Student {
                             preparedStmt.setInt(8, result.getInt(1));
                             preparedStmt.executeUpdate();
                             System.out.println(preparedStmt);
-                            ImageIcon doneIcon = new ImageIcon("src//Assets//done.png");
+                            ImageIcon doneIcon = new ImageIcon("bin//Assets//done.png");
                             Image doneImage = doneIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
                             JOptionPane.showMessageDialog(adminSubPanel,
                                     "Insertion Done !\nUser Name : " + emailField.getText()
@@ -1453,7 +1455,7 @@ public class Student {
                             preparedStmt.setInt(8, result.getInt(1));
                             preparedStmt.executeUpdate();
                             System.out.println(preparedStmt);
-                            ImageIcon doneIcon = new ImageIcon("src//Assets//done.png");
+                            ImageIcon doneIcon = new ImageIcon("bin//Assets//done.png");
                             Image doneImage = doneIcon.getImage().getScaledInstance(70, 70, Image.SCALE_SMOOTH);
                             JOptionPane.showMessageDialog(adminSubPanel,
                                     "Insertion Done !\nUser Name : " + emailField.getText()
