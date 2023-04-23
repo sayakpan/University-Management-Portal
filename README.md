@@ -33,6 +33,35 @@ To get started with the management system, follow these steps:
 3. Open the project in an IDE of your choice.
 4. Build and run the project.
 
+#### OR    ```Run JAR```
+
+1. Download the JAR file from the GitHub repository by clicking the "Download" button or using the command 
+
+```git clone https://github.com/sayakpan/University-Management-Portal.git```
+
+2. Open your command prompt or terminal and navigate to the directory where the JAR file is located using the cd command.
+3. Run the JAR file using the command 
+
+```java -jar University-Management-Portal.jar```.
+
+Note: Make sure that you have the latest version of Java installed on your computer. If you encounter any errors, try updating your Java installation.
+
+4. The JAR file should now be running. Follow the instructions on the application to continue.
+
+#### OR    ```Run .exe```
+
+1. Clone or download the repository to your local machine.
+
+```git clone https://github.com/sayakpan/University-Management-Portal.git```
+
+2. Navigate to the directory where the executable file is located.
+3. Double-click on the executable file to run it.
+
+  ```University-Management-Portal.exe```
+
+4. If prompted, click "Yes" to allow the file to make changes to your device.
+5. The program should start running. Follow the on-screen instructions to use the program.
+
 ## Usage
 
 Upon launching the management system, you will be prompted to log in as a student, teacher, or admin. After logging in, you will be able to view and modify the relevant data.
